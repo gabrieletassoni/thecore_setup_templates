@@ -88,10 +88,18 @@ class ManageProjectsWorkingDir < Thor
             if File.exists? ".git"
               remote_url = run "git config --get remote.origin.url", capture: true
               say remote_url, :red
+              run "git add . -A"
+              run "git commit -a -m 'Automatic commit #{Time.now}'"
               Dir.chdir ".." do
                 ary = d.split(File::SEPARATOR)
                 directory = ary.pop
                 run "git clone --bare '#{directory}' '#{directory.gsub(/ +/, "_")}.git'"
+                Dir.chdir "#{directory.gsub(/ +/, "_")}.git" do
+                  FileUtils.mv "./hooks/post-update.sample", "./hooks/post-update", force: true
+                  run "chmod a+x ./hooks/post-update"
+                  run "git update-server-info"
+                end
+                # Moving all in the pivot directory
                 git_repo = File.join(Dir.home, "taris_git", *ary)
                 FileUtils.mkdir_p git_repo
                 FileUtils.mv File.join(Dir.pwd, "#{directory.gsub(/ +/, "_")}.git"), File.join(git_repo, "#{directory.gsub(/ +/, "_")}.git"), force: true

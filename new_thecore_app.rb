@@ -34,9 +34,11 @@ add_source gems_repo do
     thegem = item.url.to_s[/(thecore_.*|rails_admin_.*)\-.*\.gem$/, 1]
     useful_gems.push(thegem) unless thegem.nil? || thegem.empty?
   end
+
   useful_gems.each do |u_gem|
     gem u_gem if u_gem.includes?("thecore_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
   end
+  
   useful_gems.each do |u_gem|
     gem u_gem if u_gem.includes?("rails_admin_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
   end
