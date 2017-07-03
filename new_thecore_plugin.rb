@@ -43,4 +43,4 @@ gsub_file "#{@name}.gemspec", 's.description', "s.description = 'Thecorized #{@n
 run "bundle"
 
 # then run thecorize_plugin generator
-rails_command "g thecorize_plugin #{@name}"
+#rails_command "g thecorize_plugin #{@name}"
