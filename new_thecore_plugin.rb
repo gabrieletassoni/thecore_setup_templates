@@ -1,3 +1,4 @@
+run "gem install bundle --no-ri --no-rdoc", capture: false
 current_gem_user = run "bundle config www.taris.it", capture: true
 # Set for the current user (/Users/iltasu/.bundle/config): "bah"
 credentials = current_gem_user.match(/^[\s\t]*Set for the current user .*: "(.*)"/)[1] rescue nil
