@@ -2,7 +2,7 @@ current_gem_user = run "bundle config www.taris.it", capture: true
 # Set for the current user (/Users/iltasu/.bundle/config): "bah"
 credentials = current_gem_user.match(/^[\s\t]*Set for the current user .*: "(.*)"/)[1] rescue nil
 
-if credentials.blank? || yes?("Credentials already set, do you want to change them?", :red)
+if(credentials.blank? || yes?("Credentials already set, do you want to change them?", :red))
   username = ask "Please provide your username: ", :red
   password = ask "Please provide your password: ", :red
   credentials = "#{username}:#{password}"
@@ -43,4 +43,4 @@ gsub_file "#{@name}.gemspec", 's.description', "s.description = 'Thecorized #{@n
 run "bundle"
 
 # then run thecorize_plugin generator
-#rails_command "g thecorize_plugin #{@name}"
+rails_command "g thecorize_plugin #{@name}"
