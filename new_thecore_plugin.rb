@@ -21,6 +21,7 @@ unless versions.empty?
     gem_dependency += ", '~> #{answer.split(".").first}'"
   else
     answer = "1"
+  end
 end
 inject_into_file "#{@name}.gemspec", before: /^end/ do
 "  #{gem_dependency}
