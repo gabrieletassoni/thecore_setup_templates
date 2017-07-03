@@ -17,22 +17,10 @@ output = run "gem search ^thecore$ -ra --source https://www.taris.it/gems-repo/"
 gem_dependency = "s.add_dependency 'thecore'"
 versions = output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue []
 unless versions.empty?
-  answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions.push("cancel")
-  if answer != "cancel"
-    gem_dependency += ", '~> #{answer}'"
-  else
-    answer = "1"
-  end
+  answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
+  say "You selected #{answer}"
+  gem_dependency += ", '~> #{answer}'"
 end
-inject_into_file "#{@name}.gemspec", before: /^end/ do
-"  #{gem_dependency}
-"
-end
-# GEMFILE
-add_source "https://www.taris.it/gems-repo" do
-  gem 'thecore', "~> #{answer.split(".").first}" # , path: '../../thecore_project/thecore'
-end
-
 # GEMSPEC
 gsub_file "#{@name}.gemspec", 's.add_dependency', '# s.add_dependency'
 gsub_file "#{@name}.gemspec", 's.add_development_dependency', '# s.add_development_dependency'
@@ -40,6 +28,16 @@ gsub_file "#{@name}.gemspec", 's.add_development_dependency', '# s.add_developme
 gsub_file "#{@name}.gemspec", 's.homepage', "s.homepage = 'https://www.taris.it' #"
 gsub_file "#{@name}.gemspec", 's.summary', "s.summary = 'Thecorized #{@name}' #"
 gsub_file "#{@name}.gemspec", 's.description', "s.description = 'Thecorized #{@name} full description.' #"
+
+inject_into_file "#{@name}.gemspec", before: /^end/ do
+"  #{gem_dependency}
+"
+end
+
+# GEMFILE
+add_source "https://www.taris.it/gems-repo" do
+  gem 'thecore', "~> #{answer}" # , path: '../../thecore_project/thecore'
+end
 
 # Run bundle
 run "bundle"
