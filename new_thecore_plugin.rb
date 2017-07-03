@@ -19,7 +19,7 @@ versions = output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue []
 unless versions.empty?
   answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions.push("cancel")
   if answer != "cancel"
-    gem_dependency += ", '~> #{answer.split(".").first}'"
+    gem_dependency += ", '~> #{answer}'"
   else
     answer = "1"
   end

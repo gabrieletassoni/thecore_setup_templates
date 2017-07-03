@@ -111,11 +111,15 @@ class ManageProjectsWorkingDir < Thor
     end
   end
 
+  # Per usarlo, entrare nella cartella dove è presente questo file .thor e lanciare, ad esempio:
+  # thor manage_projects_working_dir:create_gems /home/iltasu/Git/rails/mobilart_project
   desc "This creates gems wherever the gemspec files are, then moves them from DIR into a directory", "This creates gems wherever the gemspec files are, then moves them from DIR into a directory"
   def create_gems dir
     gems_repo = File.join(Dir.home, "gems-repo")
     FileUtils.mkdir_p gems_repo
-    Dir.glob(File.join(dir, "**", "*.gemspec")).each do |gspec_file|
+    gspecs = File.join(dir, "**", "*.gemspec")
+    say "Looking for gemspecs in DIR: #{gspecs}", :green
+    Dir.glob(gspecs).each do |gspec_file|
       say "Gspec: #{gspec_file}", :red
       Dir.chdir gems_repo do
         run "gem build '#{gspec_file}'"
