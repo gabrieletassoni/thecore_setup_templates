@@ -19,7 +19,7 @@ versions = output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue []
 unless versions.empty?
   answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
   say "You selected #{answer}"
-  gem_dependency += ", '~> #{answer}'"
+  gem_dependency += ", '~> #{answer.split(".").first(2).join(".")}'"
 end
 # GEMSPEC
 gsub_file "#{@name}.gemspec", 's.add_dependency', '# s.add_dependency'
@@ -36,7 +36,7 @@ end
 
 # GEMFILE
 add_source "https://www.taris.it/gems-repo" do
-  gem 'thecore', "~> #{answer}" # , path: '../../thecore_project/thecore'
+  gem 'thecore', "~> #{answer.split(".").first(2).join(".")}" # , path: '../../thecore_project/thecore'
 end
 
 gem 'sqlite3' # Necessario per rails quando faccio girare il tutto da engine
