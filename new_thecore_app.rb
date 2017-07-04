@@ -38,7 +38,7 @@ add_source gems_repo do
   useful_gems.each do |u_gem|
     gem u_gem if u_gem.includes?("thecore_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
   end
-  
+
   useful_gems.each do |u_gem|
     gem u_gem if u_gem.includes?("rails_admin_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
   end
@@ -48,7 +48,7 @@ end
 run "bundle"
 
 # then run thecorize_plugin generator
-rails_command "g thecorize_app #{@name}"
+rails_command "g thecore:thecorize_app #{@name}"
 
 # DB
 rails_command "db:create"

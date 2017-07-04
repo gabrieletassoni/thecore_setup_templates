@@ -39,8 +39,10 @@ add_source "https://www.taris.it/gems-repo" do
   gem 'thecore', "~> #{answer}" # , path: '../../thecore_project/thecore'
 end
 
+gem 'sqlite3' # Necessario per rails quando faccio girare il tutto da engine
+
 # Run bundle
 run "bundle"
 
 # then run thecorize_plugin generator
-rails_command "g thecorize_plugin #{@name}"
+rails_command "g thecore:thecorize_plugin #{@name}"
