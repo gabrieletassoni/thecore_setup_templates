@@ -118,11 +118,11 @@ class ManageProjectsWorkingDir < Thor
     gems_repo = File.join(Dir.home, "gems-repo")
     FileUtils.mkdir_p gems_repo
     gspecs = File.join(dir, "**", "*.gemspec")
-    say "Looking for gemspecs in DIR: #{gspecs}", :green
     Dir.glob(gspecs).each do |gspec_file|
       say "Gspec: #{gspec_file}", :red
-      Dir.chdir gems_repo do
-        run "gem build '#{gspec_file}'"
+      Dir.chdir File.dirname(gspec_file) do
+        run "gem build '#{File.basename gspec_file}'"
+        FileUtils.mv Dir["*.gem"].select {|f| test ?f, f}, gems_repo
       end
     end
   end

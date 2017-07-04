@@ -34,6 +34,11 @@ inject_into_file "#{@name}.gemspec", before: /^end/ do
 "
 end
 
+inject_into_file "lib/{@name}/engine.rb", before: /^module #{Thor::Util.camel_case@name)}$/ do
+"require 'thecore'
+"
+end
+
 # GEMFILE
 add_source "https://www.taris.it/gems-repo" do
   gem 'thecore', "~> #{answer.split(".").first(2).join(".")}" # , path: '../../thecore_project/thecore'
