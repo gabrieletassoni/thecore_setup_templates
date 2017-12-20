@@ -16,7 +16,7 @@ gems_repo = "https://www.taris.it/gems-repo/"
 
 add_source gems_repo do
   output = run "gem search ^thecore$ -ra --source #{gems_repo}", capture: true
-  versions = output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue []
+  versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue [])
   unless versions.empty?
     answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
     say "You selected #{answer}"
