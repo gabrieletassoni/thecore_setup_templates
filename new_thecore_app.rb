@@ -23,7 +23,7 @@ add_source gems_repo do
   end
   gem 'thecore', "~> #{answer.split(".").first(2).join(".") rescue '1.0'}" # , path: '../../thecore_project/thecore'
 
-  all_gems_in_source = run "gem search -r --source #{gems_repo}", capture: true
+  # all_gems_in_source = run "gem search -r --source #{gems_repo}", capture: true
 
   dav = Net::DAV.new(gems_repo, :curl => false)
   dav.verify_server = false
@@ -34,6 +34,8 @@ add_source gems_repo do
     thegem = item.url.to_s[/(thecore_.*|rails_admin_.*)\-.*\.gem$/, 1]
     useful_gems.push(thegem) unless thegem.nil? || thegem.empty?
   end
+
+  useful_gems.uniq!
 
   useful_gems.each do |u_gem|
     gem u_gem if u_gem.include?("thecore_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
@@ -51,5 +53,6 @@ run "bundle"
 rails_command "g thecore:thecorize_app #{@name}"
 
 # DB
-rails_command "db:create"
-rails_command "db:migrate"
+## Cannot use until I find a suitable way to deal with postgresql password for development 
+#rails_command "db:create"
+#rails_command "db:migrate"
