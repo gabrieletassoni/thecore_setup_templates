@@ -21,7 +21,7 @@ add_source gems_repo do
     answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
     say "You selected #{answer}"
   end
-  gem 'thecore', "~> #{answer.split(".").first(2).join(".")}" # , path: '../../thecore_project/thecore'
+  gem 'thecore', "~> #{answer.split(".").first(2).join(".") rescue '1.0'}" # , path: '../../thecore_project/thecore'
 
   all_gems_in_source = run "gem search -r --source #{gems_repo}", capture: true
 
