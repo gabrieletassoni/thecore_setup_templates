@@ -151,14 +151,6 @@ def thecoreize_the_models
   rails_command "g thecore:thecorize_models #{@name}"
 end
 
-# RUNNING FUNCTIONS
-migrations_to_main_app
-add_require_thecore
-add_ability_file
-add_after_initialize_file
-manage_git
-thecoreize_the_models
-
 # PRIVATE FUNCTIONS
 def ask_question_multiple_choice models, question = "Choose among one of these, please."
   return [] if models.empty?
@@ -207,3 +199,12 @@ def has_has_many_association? file, assoc
   reg_def = "^[ \\t]+has_many[ \\t]+:#{assoc}"
   (File.readlines(file).grep(Regexp.new(reg_def)).size > 0) rescue false
 end
+
+
+# RUNNING FUNCTIONS
+migrations_to_main_app
+add_require_thecore
+add_ability_file
+add_after_initialize_file
+manage_git
+thecoreize_the_models
