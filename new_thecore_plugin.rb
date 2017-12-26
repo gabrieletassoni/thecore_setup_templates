@@ -41,7 +41,7 @@ end
 
 # GEMFILE
 add_source "https://www.taris.it/gems-repo" do
-  gem 'thecore', "~> #{answer.split(".").first(2).join(".")}" # , path: '../../thecore_project/thecore'
+  gem 'thecore', "~> #{answer.split(".").first(2).join(".") rescue '1.0'}" # , path: '../../thecore_project/thecore'
 end
 
 gem 'sqlite3' # Necessario per rails quando faccio girare il tutto da engine
