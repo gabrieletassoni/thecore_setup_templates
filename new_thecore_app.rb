@@ -1,21 +1,42 @@
-require 'net/dav'
+#require 'net/dav'
 # Selecting the gems needed
-current_gem_user = run "bundle config www.taris.it", capture: true
+# current_gem_user = run "bundle config www.taris.it", capture: true
 # Set for the current user (/Users/iltasu/.bundle/config): "bah"
-credentials = current_gem_user.match(/^[\s\t]*Set for the current user .*: "(.*)"/)[1] rescue nil
+# credentials = current_gem_user.match(/^[\s\t]*Set for the current user .*: "(.*)"/)[1] rescue nil
 
-if credentials.blank? || yes?("Credentials already set, do you want to change them?", :red)
-  username = ask "Please provide your username: ", :red
-  password = ask "Please provide your password: ", :red
-  credentials = "#{username}:#{password}"
-  run "bundle config www.taris.it '#{credentials}'"
-  run "gem sources --add 'https://#{credentials}@www.taris.it/gems-repo/'"
-end
+#if credentials.blank? || yes?("Credentials already set, do you want to change them?", :red)
+#  username = ask "Please provide your username: ", :red
+#  password = ask "Please provide your password: ", :red
+#  credentials = "#{username}:#{password}"
+#  run "bundle config www.taris.it '#{credentials}'"
+#  run "gem sources --add 'https://#{credentials}@www.taris.it/gems-repo/'"
+#end
 
-gems_repo = "https://www.taris.it/gems-repo/"
+#gems_repo = "https://www.taris.it/gems-repo/"
 
+# Asking which thecore gem to install
+  output = run "gem search ^thecore$ -ra", capture: true
+  versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue [])
+  #unless versions.empty?
+  #  answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
+  #  say "You selected #{answer}"
+  #end
+  version = "~> #{versions.first.split(".").first(2).join(".") rescue '1.0'}"
+  say "Installing thecore version #{version}"
+  gem 'thecore', version # , path: '../../thecore_project/thecore'
+
+# Asking which thecore gems to install
+  output = run "gem search ^thecore_.*$ -ra", capture: true
+  output.split("\n").each do |line| 
+    match = line.match /^(thecore_.*) \((.*)\)$/
+    unless match.blank?
+      version = "~> #{match[2].split(",").first.gsub("(","").split(".").first(2).join(".") rescue '1.0'}"
+      gem match[1], version if yes? "Do you want to install #{match[1]} version #{version}", :red
+    end
+  end
+=begin
 add_source gems_repo do
-  output = run "gem search ^thecore$ -ra --source #{gems_repo}", capture: true
+  output = run "gem search ^thecore$ -ra", capture: true
   versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue [])
   unless versions.empty?
     answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
@@ -45,6 +66,7 @@ add_source gems_repo do
     gem u_gem if u_gem.include?("rails_admin_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
   end
 end
+=end
 
 # Run bundle
 run "bundle"
