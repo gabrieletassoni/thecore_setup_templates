@@ -1,3 +1,4 @@
+require 'open-uri'
 # Asking which thecore gem to install
 output = run 'gem search ^thecore$ -ra', capture: true
 versions = (begin
@@ -17,7 +18,7 @@ gem 'thecore', version # , path: '../../thecore_project/thecore'
 # Adding base gems
 gem 'thecore_settings', '~> 1.1', require: 'thecore_settings'
 # Do you want REST API?
-gem 'thecore_api', '~> 1.1', require: 'thecore_api' if yes? "Do you want REST API capability for your thecore application?", :red
+gem 'thecore_api', '~> 1.1', require: 'thecore_api' if yes? 'Do you want REST API capability for your thecore application?', :red
 
 # Asking which thecore theme to install
 output = run 'gem search ^thecore_.*$ -ra', capture: true
@@ -33,30 +34,47 @@ output.split("\n").each do |line|
   themes[match[1]] = version
 end
 
-theme = ask "Which theme for thecore do you want to use?", :red, limited_to: themes.keys
+theme = ask 'Which theme for thecore do you want to use?', :red, limited_to: themes.keys
 say "You selected #{theme}"
 gem theme, themes[theme], require: theme
 
 # Run bundle
 run 'bundle'
 
-# then run thecorize_plugin generator
-rails_command "g thecore:thecorize_app #{@name}"
+# remove the index.html
+remove_file 'public/index.html'
 
-      #remove the index.html
-      remove_file 'public/index.html'
+# Add thecore references to js and css
+# *= require thecore to application.css before */
+# //= require thecore to application.js before //= require_tree .
+inject_into_file 'app/assets/javascripts/application.js', before: '//= require_tree .' do
+  <<-'RUBY'
+  puts "//= require thecore"
+  RUBY
+end
+inject_into_file 'app/assets/stylesheets/application.css', before: '*/ .' do
+  <<-'RUBY'
+  puts "*= require thecore"
+  RUBY
+end
 
-    # Add thecore references to js and css
-    # *= require thecore to application.css before */
-    # //= require thecore to application.js before //= require_tree .
-      inject_into_file 'app/assets/javascripts/application.js', before: "//= require_tree ." do <<-'RUBY'
-        puts "//= require thecore"
-        RUBY
-      end
-      inject_into_file 'app/assets/stylesheets/application.css', before: "*/ ." do <<-'RUBY'
-        puts "*= require thecore"
-        RUBY
-      end
-      
-    # TODO: remove from application controller the protect_from_forgery with: :exception part
-      gsub_file 'app/controllers/application_controller.rb', 'protect_from_forgery with: :exception', ''
+# TODO: remove from application controller the protect_from_forgery with: :exception part
+gsub_file 'app/controllers/application_controller.rb', 'protect_from_forgery with: :exception', ''
+
+# Adding gitignore file
+gitignr = open('https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thor_templates/gitignore', &:read)
+create_file '.gitignore', gitignr
+
+git :init
+git add: '.gitignore'
+git commit: "-a -m 'Added gitignore'"
+git add: '. -A'
+git commit: "-a -m 'First commit'"
+Dir.chdir('.git/hooks') do
+  begin
+    File.rename('post-update.sample', 'post-update')
+  rescue StandardError
+    nil
+  end
+  system 'chmod +x post-update'
+end
