@@ -1,80 +1,100 @@
-#require 'net/dav'
+# require 'net/dav'
 # Selecting the gems needed
 # current_gem_user = run "bundle config www.taris.it", capture: true
 # Set for the current user (/Users/iltasu/.bundle/config): "bah"
 # credentials = current_gem_user.match(/^[\s\t]*Set for the current user .*: "(.*)"/)[1] rescue nil
 
-#if credentials.blank? || yes?("Credentials already set, do you want to change them?", :red)
+# if credentials.blank? || yes?("Credentials already set, do you want to change them?", :red)
 #  username = ask "Please provide your username: ", :red
 #  password = ask "Please provide your password: ", :red
 #  credentials = "#{username}:#{password}"
 #  run "bundle config www.taris.it '#{credentials}'"
 #  run "gem sources --add 'https://#{credentials}@www.taris.it/gems-repo/'"
-#end
+# end
 
-#gems_repo = "https://www.taris.it/gems-repo/"
+# gems_repo = "https://www.taris.it/gems-repo/"
 
 # Asking which thecore gem to install
-  output = run "gem search ^thecore$ -ra", capture: true
-  versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue [])
-  #unless versions.empty?
-  #  answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
-  #  say "You selected #{answer}"
-  #end
-  version = "~> #{versions.first.split(".").first(2).join(".") rescue '1.0'}"
-  say "Installing thecore version #{version}"
-  gem 'thecore', version # , path: '../../thecore_project/thecore'
+output = run 'gem search ^thecore$ -ra', capture: true
+versions = (begin
+              output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(', ')
+            rescue StandardError
+              []
+            end)
+# unless versions.empty?
+#  answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
+#  say "You selected #{answer}"
+# end
+version = "~> #{begin
+                  versions.first.split('.').first(2).join('.')
+                rescue StandardError
+                  '1.0'
+                end}"
+say "Installing thecore version #{version}"
+gem 'thecore', version # , path: '../../thecore_project/thecore'
 
-# Asking which thecore gems to install
-  output = run "gem search ^thecore_.*$ -ra", capture: true
-  output.split("\n").each do |line| 
-    match = line.match /^(thecore_.*) \((.*)\)$/
-    unless match.blank?
-      version = "~> #{match[2].split(",").first.gsub("(","").split(".").first(2).join(".") rescue '1.0'}"
-      gem match[1], version if yes? "Do you want to install #{match[1]} version #{version}", :red
-    end
-  end
-=begin
-add_source gems_repo do
-  output = run "gem search ^thecore$ -ra", capture: true
-  versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue [])
-  unless versions.empty?
-    answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
-    say "You selected #{answer}"
-  end
-  gem 'thecore', "~> #{answer.split(".").first(2).join(".") rescue '1.0'}" # , path: '../../thecore_project/thecore'
+# Adding base gems
+gem 'thecore_settings', '~> 1.1', require: 'thecore_settings'
+# Do you want REST API?
+gem 'thecore_api', '~> 1.1', require: 'thecore_api' if yes? "Do you want REST API capability for your thecore application?", :red
 
-  # all_gems_in_source = run "gem search -r --source #{gems_repo}", capture: true
-
-  dav = Net::DAV.new(gems_repo, :curl => false)
-  dav.verify_server = false
-  dav.credentials(*(credentials.split(":")))
-
-  useful_gems = []
-  dav.find('.',:recursive=>true,:suppress_errors=>true,:filename=>/\.gem$/) do | item |
-    thegem = item.url.to_s[/(thecore_.*|rails_admin_.*)\-.*\.gem$/, 1]
-    useful_gems.push(thegem) unless thegem.nil? || thegem.empty?
-  end
-
-  useful_gems.uniq!
-
-  useful_gems.each do |u_gem|
-    gem u_gem if u_gem.include?("thecore_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
-  end
-
-  useful_gems.each do |u_gem|
-    gem u_gem if u_gem.include?("rails_admin_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
-  end
+# Asking which thecore theme to install
+output = run 'gem search ^thecore_.*$ -ra', capture: true
+themes = {}
+output.split("\n").each do |line|
+  match = line.match /^(thecore_theme_.*) \((.*)\)$/
+  next if match.blank?
+  version = "~> #{begin
+                    match[2].split(',').first.delete('(').split('.').first(2).join('.')
+                  rescue StandardError
+                    '1.0'
+                  end}"
+  themes[match[1]] = version
 end
-=end
+
+theme = ask "Which theme for thecore do you want to use?", :red, limited_to: themes.keys
+say "You selected #{theme}"
+gem theme, themes[theme], require: theme
+
+# add_source gems_repo do
+#   output = run "gem search ^thecore$ -ra", capture: true
+#   versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(", ") rescue [])
+#   unless versions.empty?
+#     answer = ask "Which version of thecore do you want to use?", :red, limited_to: versions
+#     say "You selected #{answer}"
+#   end
+#   gem 'thecore', "~> #{answer.split(".").first(2).join(".") rescue '1.0'}" # , path: '../../thecore_project/thecore'
+#
+#   # all_gems_in_source = run "gem search -r --source #{gems_repo}", capture: true
+#
+#   dav = Net::DAV.new(gems_repo, :curl => false)
+#   dav.verify_server = false
+#   dav.credentials(*(credentials.split(":")))
+#
+#   useful_gems = []
+#   dav.find('.',:recursive=>true,:suppress_errors=>true,:filename=>/\.gem$/) do | item |
+#     thegem = item.url.to_s[/(thecore_.*|rails_admin_.*)\-.*\.gem$/, 1]
+#     useful_gems.push(thegem) unless thegem.nil? || thegem.empty?
+#   end
+#
+#   useful_gems.uniq!
+#
+#   useful_gems.each do |u_gem|
+#     gem u_gem if u_gem.include?("thecore_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
+#   end
+#
+#   useful_gems.each do |u_gem|
+#     gem u_gem if u_gem.include?("rails_admin_") && yes?("Would you like to use the gem '#{u_gem}' for this project?", :red)
+#   end
+# end
 
 # Run bundle
-run "bundle"
+run 'bundle'
 
 # then run thecorize_plugin generator
 rails_command "g thecore:thecorize_app #{@name}"
 
 # DB
-## Cannot use until I find a suitable way to deal with postgresql password for development 
-#rails_command "db:create"
-#rails_command "db:migrate"
+## Cannot use until I find a suitable way to deal with postgresql password for development
+# rails_command "db:create"
+# rails_command "db:migrate"
