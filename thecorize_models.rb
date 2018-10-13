@@ -114,52 +114,53 @@ say "Add Has Many Associations", :green
 
         # Polymorphic must be managed manually
         File.readlines(file).grep(/^(?!.*polymorphic.*)^[ \t]*belongs_to :(.*),.+/).each do |a|
-        target_association = a[/:(.*?),/,1]
-        # look if the file identified by association .rb exists
-        associated_file = File.join("app/models","#{target_association}.rb")
-        starting_model = entry.split(".").first.pluralize
-        # say "Found belongs_to association: #{target_association} for the model: #{starting_model}", :green
-        # say "- Looking for model file: #{associated_file}", :green
-        if File.exists?(associated_file)
-            # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
-            # if true, check that the association is non existent and add the association to that file
-            inject_into_file associated_file, after: " < ApplicationRecord\n" do
-                "\n\t\thas_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
-            end unless has_has_many_association?(associated_file, starting_model)
-        else
-            # otherwise (the file does not exist) check if the initializer for concerns exists,
-            # For each model in this gem
-            initializer_name = "associations_#{name}_#{target_association}_concern.rb"
-            initializer initializer_name do
-                "require 'active_support/concern'"
-                ""
-                "module #{target_association.classify}AssociationsConcern"
-                "   extend ActiveSupport::Concern"
-                "   included do"
-                "   end"
-                "end"
-                ""
-                "# include the extension"
-                "# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)"
-                ""
-            end unless File.exists?(File.join("config/initializers", initializer_name))
-
-            # AGGIUNGO L'INCLUDE
-            say "Adding after_initialize file", :green
-            after_initialize_file_name = "after_initialize_for_#{@name}.rb"
-            after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
-            initializer after_initialize_file_name do
-                "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
-            end unless File.exists?(after_initialize_file_fullpath)
-            inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
-                "\n\t\t#{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)\n"
-            end
-
-            # then add to it the has_many declaration
-            # TODO: only if it doesn't already exists
-            inject_into_file File.join(@plugin_initializers_dir, initializer_name), after: "included do\n" do
-                ""
-                "       has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
+            target_association = a[/:(.*?),/,1]
+            # look if the file identified by association .rb exists
+            associated_file = File.join("app/models","#{target_association}.rb")
+            starting_model = entry.split(".").first.pluralize
+            # say "Found belongs_to association: #{target_association} for the model: #{starting_model}", :green
+            # say "- Looking for model file: #{associated_file}", :green
+            if File.exists?(associated_file)
+                # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
+                # if true, check that the association is non existent and add the association to that file
+                inject_into_file associated_file, after: " < ApplicationRecord\n" do
+                    "\n\t\thas_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
+                end unless has_has_many_association?(associated_file, starting_model)
+            else
+                # otherwise (the file does not exist) check if the initializer for concerns exists,
+                # For each model in this gem
+                initializer_name = "associations_#{name}_#{target_association}_concern.rb"
+                initializer initializer_name do
+                    "require 'active_support/concern'"
+                    ""
+                    "module #{target_association.classify}AssociationsConcern"
+                    "   extend ActiveSupport::Concern"
+                    "   included do"
+                    "   end"
+                    "end"
+                    ""
+                    "# include the extension"
+                    "# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)"
+                    ""
+                end unless File.exists?(File.join("config/initializers", initializer_name))
+    
+                # AGGIUNGO L'INCLUDE
+                say "Adding after_initialize file", :green
+                after_initialize_file_name = "after_initialize_for_#{@name}.rb"
+                after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
+                initializer after_initialize_file_name do
+                    "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
+                end unless File.exists?(after_initialize_file_fullpath)
+                inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
+                    "\n\t\t#{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)\n"
+                end
+    
+                # then add to it the has_many declaration
+                # TODO: only if it doesn't already exists
+                inject_into_file File.join(@plugin_initializers_dir, initializer_name), after: "included do\n" do
+                    ""
+                    "       has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
+                end
             end
         end
     end
