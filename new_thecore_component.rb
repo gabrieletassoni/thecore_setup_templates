@@ -28,6 +28,7 @@ inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name
 "require 'thecore'\n"
 end
 
+say "Starting to apply deeper customizations in rder to thecorize the component", :green
 # Creating a thecore root component
 if yes? "Is this component a root action (A general action which is shown in the root menu of Thecore app and is not directly linked with a model)?", :red
   # make this a rails_admin plugin
