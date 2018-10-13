@@ -29,4 +29,4 @@ inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name
 end
 
 # then run thecorize_component
-rails_command "app:template LOCATION='https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecorize_component.rb'"
+apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecorize_component.rb"
