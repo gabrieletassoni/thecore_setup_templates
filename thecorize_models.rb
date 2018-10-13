@@ -46,13 +46,12 @@ def has_has_many_association? file, assoc
     (File.readlines(file).grep(Regexp.new(reg_def)).size > 0) rescue false
 end
 
-Dir.chdir 'app/models' do
-    # Getting all the models that are activerecords:
-    @model_files = Dir.glob('*.rb').map do |model|
-        file = File.join('app/models', model)
-        model if is_applicationrecord?(file) || is_activerecord?(file)
-    end.compact
-end
+# Dir.chdir 'app/models' do
+# Getting all the models that are activerecords:
+@model_files = Dir.glob('app/models/*.rb').map do |model|
+    model if is_applicationrecord?(model) || is_activerecord?(model)
+end.compact
+# end
 
 say "Replace ActiveRecord::Base with ApplicationRecord", :green
 say "Add rails_admin declaration only in files which are ActiveRecords and don't already have that declaration", :green
