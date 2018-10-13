@@ -42,3 +42,5 @@ if yes? "Is this component a root action (A general action which is shown in the
 end
 # Run component thecorization
 apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecorize_component.rb"
+# Make this git more groovy
+apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecore_git_management.rb"
