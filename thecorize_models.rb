@@ -50,7 +50,7 @@ Dir.chdir 'app/models' do
     # Getting all the models that are activerecords:
     @model_files = Dir.glob('*.rb').map do |model|
         file = File.join('app/models', model)
-        model if is_applicationrecord?(file)
+        model if is_applicationrecord?(file) || is_activerecord?(file)
     end.compact
 end
 
@@ -63,14 +63,14 @@ say "Completing Belongs To Associations", :green
     gsub_file entry, "ActiveRecord::Base", "ApplicationRecord"
     # Rails admin
     inject_into_file entry, before: /^end/ do
-"
-    RailsAdmin.config do |config|
-        config.model self.name.underscore.capitalize.classify do
-            navigation_label I18n.t('admin.settings.label')
-            navigation_icon 'fa fa-file'
-        end
-    end
-"
+        ""
+        "RailsAdmin.config do |config|"
+        "   config.model self.name.underscore.capitalize.classify do"
+        "       navigation_label I18n.t('admin.settings.label')"
+        "       navigation_icon 'fa fa-file'"
+        "    end"
+        "end"
+        ""
     end unless has_rails_admin_declaration entry
     # Belongs to
     gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
@@ -93,16 +93,12 @@ say "Add Has Many Through Associations", :green
             # This side of the through
             inject_into_file File.join("app/models", "#{left_side}.rb"), after: " < ApplicationRecord\n" do
                 #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
-"
-    has_many :#{right_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{left_side.pluralize}
-"
+                "    has_many :#{right_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{left_side.pluralize}"
             end
             # Other side of the through
             inject_into_file File.join("app/models", "#{right_side}.rb"), after: " < ApplicationRecord\n" do
                 #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
-"
-    has_many :#{left_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{right_side.pluralize}
-"
+                "    has_many :#{left_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{right_side.pluralize}"
             end
         end
     end
@@ -135,17 +131,17 @@ say "Add Has Many Associations", :green
             # For each model in this gem
             initializer_name = "associations_#{name}_#{target_association}_concern.rb"
             initializer initializer_name do
-"require 'active_support/concern'
-
-module #{target_association.classify}AssociationsConcern
-    extend ActiveSupport::Concern
-    included do
-    end
-end
-
-# include the extension
-# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)
-"
+                "require 'active_support/concern'"
+                ""
+                "module #{target_association.classify}AssociationsConcern"
+                "   extend ActiveSupport::Concern"
+                "   included do"
+                "   end"
+                "end"
+                ""
+                "# include the extension"
+                "# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)"
+                ""
             end unless File.exists?(File.join("config/initializers", initializer_name))
 
             # AGGIUNGO L'INCLUDE
@@ -153,7 +149,7 @@ end
             after_initialize_file_name = "after_initialize_for_#{@name}.rb"
             after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
             initializer after_initialize_file_name do
-                "Rails.application.configure do\n\tconfig.after_initialize do\n\tend\nend"
+                "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
             end unless File.exists?(after_initialize_file_fullpath)
             inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
                 "\n\t\t#{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)\n"
@@ -162,7 +158,8 @@ end
             # then add to it the has_many declaration
             # TODO: only if it doesn't already exists
             inject_into_file File.join(@plugin_initializers_dir, initializer_name), after: "included do\n" do
-                "\n\t\thas_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
+                ""
+                "       has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
             end
         end
     end
@@ -183,9 +180,7 @@ say "Detect polymorphic Associations", :green
         answers.each do |answer|
             # Add the polymorphic has_name declaration
             inject_into_file File.join("app/models", answer), after: " < ApplicationRecord\n" do
-"
-    has_many :#{model.split(".").first.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.singularize}, dependent: :destroy
-"
+                "   has_many :#{model.split(".").first.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.singularize}, dependent: :destroy"
             end
         end
     end
