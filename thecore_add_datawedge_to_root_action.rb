@@ -8,6 +8,9 @@ if !models_versions.empty? && yes?("Found Models in parent directory, would you 
         inject_into_file "#{name}.gemspec", before: /^end/ do
             "   s.add_dependency '#{model_name}', '~> #{model_version}'\n"
         end
+        inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name)}$/ do
+            "require '#{model_name}'\n"
+        end
     end
 end
 # Getting higher version of the datawedge gem
@@ -30,7 +33,8 @@ inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name
     "require 'thecore_datawedge_websocket_helpers'\n"
 end
 # Adding code to View
-inject_into_file "app/views/rails_admin_main/#{name.gsub("rails_admin_", "")}.html.erb", after: "<%= breadcrumb %>" do
+remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
+inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb", after: "<%= breadcrumb %>" do
     '<%= render "barcode_scan_mode_detection"%>'
     '<%= render "datawedge_websocket_input_group" %>'
     ''
