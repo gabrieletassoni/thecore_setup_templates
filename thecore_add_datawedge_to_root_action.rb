@@ -35,55 +35,23 @@ end
 # Adding code to View
 remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
 inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb", after: "<%= breadcrumb %>" do
-    pivot = '<%= render "barcode_scan_mode_detection"%>'
-    pivot += "\n"
-    pivot += '<%= render "thecore_dataentry_commons" %>'
-    pivot += "\n"
-    pivot += '<div class="row" style="margin-top: 1em">'
-    pivot += "\n"
-    pivot += '  <div id="code-read" class="col-lg-12 collapse"></div>'
-    pivot += "\n"
-    pivot += '</div>'
-    pivot += "\n"
-    pivot += '<script>'
-    pivot += "\n"
-    pivot += "   var clickedBtn;\n"
-    pivot += "   var code;\n"
-    pivot += "\n"
-    pivot += "   function setAll() {\n"
-    pivot += "       // Showing all data\n"
-    pivot += "       $('#code-read').show();\n"
-    pivot += "   }\n"
-    pivot += "\n"
-    pivot += "   function resetAll() {\n"
-    pivot += "       // Hiding and clearing previous reads\n"
-    pivot += "       $('#code-read').empty();\n"
-    pivot += "       $('#code-read').hide();\n"
-    pivot += "   }\n"
-    pivot += "\n"
-    pivot += "   $('#send').on('click', function () {\n"
-    pivot += "       clickedBtn = $(this);\n"
-    pivot += "       code = $('#barcode');\n"
-    pivot += "       code.prop('disabled', true);\n"
-    pivot += "       clickedBtn.button('loading');\n"
-    pivot += "       //Send scanned barcode to controller\n"
-    pivot += "       $.get('<%=rails_admin.#{name.gsub("rails_admin_", "")}_path%>', {\n"
-    pivot += "           barcode: code.val()\n"
-    pivot += "       }, function (data, status) {\n"
-    pivot += "           resetAll();\n"
-    pivot += "           $('#code-read').append(data.barcode.scanned);\n"
-    pivot += "           setAll();\n"
-    pivot += "           resetCurrentBtn();\n"
-    pivot += "       }).fail(function (errorObj) {\n"
-    pivot += "           resetCurrentBtn();\n"
-    pivot += "           resetAll();\n"
-    pivot += "           openModal('<%=t :error %>', errorObj.responseJSON.error);\n"
-    pivot += "       });\n"
-    pivot += "   });\n"
-    pivot += '</script>'
-    pivot += "\n"
-    pivot += '<%= render "thecore_dataentry_commons_logic" %>'
-    pivot += "\n"
+'
+<!-- 
+Source code of this partial can be found here:
+https://raw.githubusercontent.com/gabrieletassoni/thecore_dataentry_commons/master/app/views/higher_level/_barcode_simple_scan.html.erb
+
+There you can find several functions you can override in order to customize behaviour 
+and computations to suit your application, the most notable ones are:
+
+barcodeScannedSuccess(data, status)
+barcodeScannedThen(appended)
+barcodeScannedFailure(errorObj)
+
+Look for the comment "// These functions can be overridden in the containing file"
+in order to find all of them.
+//-->
+<%= render "higher_level/barcode_simple_scan"%>
+'
 end
 
 # Adding code to controller
@@ -92,13 +60,13 @@ inject_into_file "lib/#{name}.rb", after: "if request.xhr?" do
     pivot += "                   if params[:barcode].blank?\n"
     pivot += '                        # Sent an empty barcode: ERROR!'
     pivot += "\n"
-    pivot += '                        message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]'
+    pivot += '                        message, status = [{ error: I18n.t(:barcode_cannot_be_empty) }, 400]'
     pivot += "\n"
     pivot += '                   else'
     pivot += "\n"
     pivot += '                        # Sent a good barcode, do something with it'
     pivot += "\n"
-    pivot += '                        message, status = [{ barcode: params[:barcode] }, 200]'
+    pivot += '                        message, status = [{ info: I18n.t(:barcode_found), barcode: params[:barcode] }, 200]'
     pivot += "\n"
     pivot += '                   end'
     pivot += "\n"

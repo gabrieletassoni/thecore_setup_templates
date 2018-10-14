@@ -54,5 +54,5 @@ initializer "load_root_action_for_#{name}.rb" do
 end
 
 create_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb" do
-    "<%= breadcrumb %>"
+    "<%= breadcrumb %>\n"
 end
