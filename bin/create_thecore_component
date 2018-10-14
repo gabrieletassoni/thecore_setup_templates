@@ -1,20 +1,17 @@
 #!/bin/bash
-COMPNAME=$(whiptail --inputbox "Please enter component's name:" 8 78 3>&1 1>&2 2>&3)
-if [ $? = 0 ]; then
-    if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then
-        FULLNAME="thecore_$COMPNAME" 
-        echo "Creating a generic component" 
-        if [ -e "$FULLNAME" ]; then
-            echo "ERROR! The file already exists, please use another name." 
-            exit 1
-        else
-            rails plugin new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/new_thecore_component.rb' --skip-gemfile --skip-bundle -T -O -S -J --full
-        fi
+echo "Please enter component's name:" 
+read COMPNAME
+if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    FULLNAME="thecore_$COMPNAME" 
+    echo "Creating a generic component" 
+    if [ -e "$FULLNAME" ]; then
+        echo "ERROR! The file already exists, please use another name." 
+        exit 1
     else
-        echo "ERROR! The name can only contain letters, numbers, - and _" 
-        exit 1;
+        rails plugin new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/new_thecore_component.rb' --skip-gemfile --skip-bundle -T -O -S -J --full
     fi
 else
+    echo "ERROR! The name can only contain letters, numbers, - and _" 
     exit 1;
 fi
 exit 0;
