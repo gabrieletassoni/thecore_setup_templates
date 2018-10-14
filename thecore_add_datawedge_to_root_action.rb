@@ -89,21 +89,21 @@ end
 # Adding code to controller
 inject_into_file "lib/#{name}.rb", after: "if request.xhr?" do
     pivot = "\n"
-    pivot += "               if params[:barcode].blank?\n"
-    pivot += '                   # Sent an empty barcode: ERROR!'
+    pivot += "                   if params[:barcode].blank?\n"
+    pivot += '                        # Sent an empty barcode: ERROR!'
     pivot += "\n"
-    pivot += '                   message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]'
+    pivot += '                        message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]'
     pivot += "\n"
-    pivot += '               else'
+    pivot += '                   else'
     pivot += "\n"
-    pivot += '                   # Sent a good barcode, do something with it'
+    pivot += '                        # Sent a good barcode, do something with it'
     pivot += "\n"
-    pivot += '                   message, status = [{ barcode: params[:barcode] }, 200]'
+    pivot += '                        message, status = [{ barcode: params[:barcode] }, 200]'
     pivot += "\n"
-    pivot += '               end'
+    pivot += '                   end'
     pivot += "\n"
-    pivot += '               # Send back the answer to the caller'
+    pivot += '                   # Send back the answer to the caller'
     pivot += "\n"
-    pivot += '               render json: MultiJson.dump(message), status: status'
+    pivot += '                   render json: MultiJson.dump(message), status: status'
     pivot += "\n"
 end
