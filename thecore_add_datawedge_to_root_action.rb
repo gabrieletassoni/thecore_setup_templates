@@ -35,14 +35,18 @@ end
 # Adding code to View
 remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
 inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb", after: "<%= breadcrumb %>" do
-    pivot = '<%= render "barcode_scan_mode_detection"%>\n'
-    pivot += '<%= render "datawedge_websocket_input_group" %>\n'
-    pivot += '\n'
-    pivot += '<div class="row" style="margin-top: 1em">\n'
-    pivot += '\t<div id="code-read" class="col-lg-12 collapse"></div>\n'
-    pivot += '</div>\n'
-    pivot += '\n'
-    pivot += '<script>\n'
+    pivot = '<%= render "barcode_scan_mode_detection"%>'
+    pivot += "\n"
+    pivot += '<%= render "datawedge_websocket_input_group" %>'
+    pivot += "\n"
+    pivot += '<div class="row" style="margin-top: 1em">'
+    pivot += "\n"
+    pivot += '  <div id="code-read" class="col-lg-12 collapse"></div>'
+    pivot += "\n"
+    pivot += '</div>'
+    pivot += "\n"
+    pivot += '<script>'
+    pivot += "\n"
     pivot += "   var clickedBtn;\n"
     pivot += "   var code;\n"
     pivot += "\n"
@@ -76,21 +80,30 @@ inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.ht
     pivot += "           openModal('<%=t :error %>', errorObj.responseJSON.error);\n"
     pivot += "       });\n"
     pivot += "   });\n"
-    pivot += '</script>\n'
-    pivot += '<%= render "datawedge_websocket_input_group_logic" %>\n'
+    pivot += '</script>'
+    pivot += "\n"
+    pivot += '<%= render "datawedge_websocket_input_group_logic" %>'
+    pivot += "\n"
 end
 
 # Adding code to controller
 inject_into_file "lib/#{name}.rb", after: "if request.xhr?" do
     pivot = "\n"
     pivot += "               if params[:barcode].blank?\n"
-    pivot += '                   # Sent an empty barcode: ERROR!\n'
-    pivot += '                   message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]\n'
-    pivot += '               else\n'
-    pivot += '                   # Sent a good barcode, do something with it\n'
-    pivot += '                   message, status = [{ barcode: params[:barcode] }, 200]\n'
-    pivot += '               end\n'
-    pivot += '               # Send back the answer to the caller\n'
-    pivot += '               render json: MultiJson.dump(message), status: status\n'
+    pivot += '                   # Sent an empty barcode: ERROR!'
+    pivot += "\n"
+    pivot += '                   message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]'
+    pivot += "\n"
+    pivot += '               else'
+    pivot += "\n"
+    pivot += '                   # Sent a good barcode, do something with it'
+    pivot += "\n"
+    pivot += '                   message, status = [{ barcode: params[:barcode] }, 200]'
+    pivot += "\n"
+    pivot += '               end'
+    pivot += "\n"
+    pivot += '               # Send back the answer to the caller'
+    pivot += "\n"
+    pivot += '               render json: MultiJson.dump(message), status: status'
     pivot += "\n"
 end

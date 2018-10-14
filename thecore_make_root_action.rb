@@ -1,8 +1,8 @@
 inject_into_file "lib/#{name}.rb", after: "RailsAdmin::Config::Actions.register(self)" do
     pivot = "\n"
-    pivot += "       register_instance_option :object_level do\n"
-    pivot += "           false\n"
-    pivot += "       end\n"
+    pivot += "      register_instance_option :object_level do\n"
+    pivot += "          false\n"
+    pivot += "      end\n"
     pivot += "		# This ensures the action only shows up for Users\n"
     pivot += "		register_instance_option :visible? do\n"
     pivot += "		    # visible only if authorized and if the object has a defined method\n"
