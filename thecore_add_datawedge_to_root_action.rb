@@ -14,9 +14,9 @@ if !models_versions.empty? && yes?("Found Models in parent directory, would you 
     end
 end
 # Getting higher version of the datawedge gem
-output = run 'gem search ^thecore_datawedge_websocket_helpers$ -ra', capture: true
+output = run 'gem search ^thecore_dataentry_commons$ -ra', capture: true
 versions = (begin
-              output.match(/^[\s\t]*thecore_datawedge_websocket_helpers \((.*)\)/)[1].split(', ')
+              output.match(/^[\s\t]*thecore_dataentry_commons \((.*)\)/)[1].split(', ')
             rescue StandardError
               []
             end)
@@ -27,10 +27,10 @@ version = "~> #{begin
                   '1.0'
                 end}"
 inject_into_file "#{name}.gemspec", before: /^end/ do
-    "   s.add_dependency 'thecore_datawedge_websocket_helpers', '#{version}'\n"
+    "   s.add_dependency 'thecore_dataentry_commons', '#{version}'\n"
 end
 inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name)}$/ do
-    "require 'thecore_datawedge_websocket_helpers'\n"
+    "require 'thecore_dataentry_commons'\n"
 end
 # Adding code to View
 remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
