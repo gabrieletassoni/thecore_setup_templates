@@ -37,7 +37,7 @@ remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.ha
 inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb", after: "<%= breadcrumb %>" do
     pivot = '<%= render "barcode_scan_mode_detection"%>'
     pivot += "\n"
-    pivot += '<%= render "datawedge_websocket_input_group" %>'
+    pivot += '<%= render "thecore_dataentry_commons" %>'
     pivot += "\n"
     pivot += '<div class="row" style="margin-top: 1em">'
     pivot += "\n"
@@ -82,7 +82,7 @@ inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.ht
     pivot += "   });\n"
     pivot += '</script>'
     pivot += "\n"
-    pivot += '<%= render "datawedge_websocket_input_group_logic" %>'
+    pivot += '<%= render "thecore_dataentry_commons_logic" %>'
     pivot += "\n"
 end
 
