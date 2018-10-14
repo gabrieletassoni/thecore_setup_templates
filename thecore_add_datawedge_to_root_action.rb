@@ -35,62 +35,62 @@ end
 # Adding code to View
 remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
 inject_into_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb", after: "<%= breadcrumb %>" do
-    '<%= render "barcode_scan_mode_detection"%>'
-    '<%= render "datawedge_websocket_input_group" %>'
-    ''
-    '<div class="row" style="margin-top: 1em">'
-    '\t<div id="code-read" class="col-lg-12 collapse"></div>'
-    '</div>'
-    ''
-    '<script>'
-    "   var clickedBtn;"
-    "   var code;"
-    ""
-    "   function setAll() {"
-    "       // Showing all data"
-    "       $('#code-read').show();"
-    "   }"
-    ""
-    "   function resetAll() {"
-    "       // Hiding and clearing previous reads"
-    "       $('#code-read').empty();"
-    "       $('#code-read').hide();"
-    "   }"
-    ""
-    "   $('#send').on('click', function () {"
-    "       clickedBtn = $(this);"
-    "       code = $('#barcode');"
-    "       code.prop('disabled', true);"
-    "       clickedBtn.button('loading');"
-    "       //Send scanned barcode to controller"
-    "       $.get('<%=rails_admin.#{name.gsub("rails_admin_", "")}_path%>', {"
-    "           barcode: code.val()"
-    "       }, function (data, status) {"
-    "           resetAll();"
-    "           $('#code-read').append(data.barcode.scanned);"
-    "           setAll();"
-    "           resetCurrentBtn();"
-    "       }).fail(function (errorObj) {"
-    "           resetCurrentBtn();"
-    "           resetAll();"
-    "           openModal('<%=t :error %>', errorObj.responseJSON.error);"
-    "       });"
-    "   });"
-    '</script>'
-    '<%= render "datawedge_websocket_input_group_logic" %>'
+    pivot = '<%= render "barcode_scan_mode_detection"%>\n'
+    pivot += '<%= render "datawedge_websocket_input_group" %>\n'
+    pivot += '\n'
+    pivot += '<div class="row" style="margin-top: 1em">\n'
+    pivot += '\t<div id="code-read" class="col-lg-12 collapse"></div>\n'
+    pivot += '</div>\n'
+    pivot += '\n'
+    pivot += '<script>\n'
+    pivot += "   var clickedBtn;\n"
+    pivot += "   var code;\n"
+    pivot += "\n"
+    pivot += "   function setAll() {\n"
+    pivot += "       // Showing all data\n"
+    pivot += "       $('#code-read').show();\n"
+    pivot += "   }\n"
+    pivot += "\n"
+    pivot += "   function resetAll() {\n"
+    pivot += "       // Hiding and clearing previous reads\n"
+    pivot += "       $('#code-read').empty();\n"
+    pivot += "       $('#code-read').hide();\n"
+    pivot += "   }\n"
+    pivot += "\n"
+    pivot += "   $('#send').on('click', function () {\n"
+    pivot += "       clickedBtn = $(this);\n"
+    pivot += "       code = $('#barcode');\n"
+    pivot += "       code.prop('disabled', true);\n"
+    pivot += "       clickedBtn.button('loading');\n"
+    pivot += "       //Send scanned barcode to controller\n"
+    pivot += "       $.get('<%=rails_admin.#{name.gsub("rails_admin_", "")}_path%>', {\n"
+    pivot += "           barcode: code.val()\n"
+    pivot += "       }, function (data, status) {\n"
+    pivot += "           resetAll();\n"
+    pivot += "           $('#code-read').append(data.barcode.scanned);\n"
+    pivot += "           setAll();\n"
+    pivot += "           resetCurrentBtn();\n"
+    pivot += "       }).fail(function (errorObj) {\n"
+    pivot += "           resetCurrentBtn();\n"
+    pivot += "           resetAll();\n"
+    pivot += "           openModal('<%=t :error %>', errorObj.responseJSON.error);\n"
+    pivot += "       });\n"
+    pivot += "   });\n"
+    pivot += '</script>\n'
+    pivot += '<%= render "datawedge_websocket_input_group_logic" %>\n'
 end
 
 # Adding code to controller
 inject_into_file "lib/#{name}.rb", after: "if request.xhr?" do
-    ""
-    "               if params[:barcode].blank?"
-    '                   # Sent an empty barcode: ERROR!'
-    '                   message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]'
-    '               else'
-    '                   # Sent a good barcode, do something with it'
-    '                   message, status = [{ barcode: params[:barcode] }, 200]'
-    '               end'
-    '               # Send back the answer to the caller'
-    '               render json: MultiJson.dump(message), status: status'
-    ""
+    pivot = "\n"
+    pivot += "               if params[:barcode].blank?\n"
+    pivot += '                   # Sent an empty barcode: ERROR!\n'
+    pivot += '                   message, status = [{ error: "#{I18n.t(:empty_barcode)}" }, 400]\n'
+    pivot += '               else\n'
+    pivot += '                   # Sent a good barcode, do something with it\n'
+    pivot += '                   message, status = [{ barcode: params[:barcode] }, 200]\n'
+    pivot += '               end\n'
+    pivot += '               # Send back the answer to the caller\n'
+    pivot += '               render json: MultiJson.dump(message), status: status\n'
+    pivot += "\n"
 end

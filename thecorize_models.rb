@@ -62,14 +62,15 @@ say "Completing Belongs To Associations", :green
     gsub_file entry, "ActiveRecord::Base", "ApplicationRecord"
     # Rails admin
     inject_into_file entry, before: /^end/ do
-        ""
-        "RailsAdmin.config do |config|"
-        "   config.model self.name.underscore.capitalize.classify do"
-        "       navigation_label I18n.t('admin.settings.label')"
-        "       navigation_icon 'fa fa-file'"
-        "    end"
-        "end"
-        ""
+        pivot = "\n"
+        pivot += "RailsAdmin.config do |config|\n"
+        pivot += "   config.model self.name.underscore.capitalize.classify do\n"
+        pivot += "       navigation_label I18n.t('admin.settings.label')\n"
+        pivot += "       navigation_icon 'fa fa-file'\n"
+        pivot += "    end\n"
+        pivot += "end\n"
+        pivot += "\n"
+        pivot
     end unless has_rails_admin_declaration entry
     # Belongs to
     gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
@@ -130,17 +131,17 @@ say "Add Has Many Associations", :green
                 # For each model in this gem
                 initializer_name = "associations_#{name}_#{target_association}_concern.rb"
                 initializer initializer_name do
-                    "require 'active_support/concern'"
-                    ""
-                    "module #{target_association.classify}AssociationsConcern"
-                    "   extend ActiveSupport::Concern"
-                    "   included do"
-                    "   end"
-                    "end"
-                    ""
-                    "# include the extension"
-                    "# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)"
-                    ""
+                    pivot = "require 'active_support/concern'\n"
+                    pivot += "\n"
+                    pivot += "module #{target_association.classify}AssociationsConcern\n"
+                    pivot += "   extend ActiveSupport::Concern\n"
+                    pivot += "   included do\n"
+                    pivot += "   end\n"
+                    pivot += "end\n"
+                    pivot += "\n"
+                    pivot += "# include the extension\n"
+                    pivot += "# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)\n"
+                    pivot += "\n"
                 end unless File.exists?(File.join("config/initializers", initializer_name))
     
                 # AGGIUNGO L'INCLUDE
@@ -157,8 +158,7 @@ say "Add Has Many Associations", :green
                 # then add to it the has_many declaration
                 # TODO: only if it doesn't already exists
                 inject_into_file File.join(@plugin_initializers_dir, initializer_name), after: "included do\n" do
-                    ""
-                    "       has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
+                    "\n     has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
                 end
             end
         end

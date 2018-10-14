@@ -1,7 +1,7 @@
 # Make the migrations in this engine be directly available to main app
 inject_into_file "lib/#{name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do
 "
-    initializer '#{name}.add_to_migrations' do |app|\n
+    initializer '#{name}.add_to_migrations' do |app|
       unless app.root.to_s == root.to_s
         # APPEND TO MAIN APP MIGRATIONS FROM THIS GEM
         config.paths['db/migrate'].expanded.each do |expanded_path|
