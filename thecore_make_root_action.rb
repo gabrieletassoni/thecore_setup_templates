@@ -50,4 +50,4 @@ initializer "load_root_action_for_#{name}.rb" do
     pivot += "end\n"
 end
 
-create_file "app/views/rails_admin_main/#{name.gsub("rails_admin_", "")}.html.erb", "<%= breadcrumb %>"
+create_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb", "<%= breadcrumb %>"
