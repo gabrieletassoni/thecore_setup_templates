@@ -68,6 +68,8 @@ inject_into_file "lib/#{name}.rb", after: "if request.xhr?" do
     pivot += "\n"
     pivot += '                        message, status = [{ info: I18n.t(:barcode_found), barcode: params[:barcode] }, 200]'
     pivot += "\n"
+    pivot += '                        message[:parameters] = params[:parameters] unless params[:parameters].blank?'
+    pivot += "\n"
     pivot += '                   end'
     pivot += "\n"
     pivot += '                   # Send back the answer to the caller'
