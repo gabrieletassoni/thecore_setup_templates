@@ -34,13 +34,13 @@ if yes? "Is this component a root action (A general action which is shown in the
   # make this a rails_admin plugin
   apply "https://gist.github.com/bbenezech/1621146/raw/5268788e715397bf476c83d76d335f152095e659/rails_admin_action_creator"
   # make the rails admin plugin a root action
-  apply 'https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecore_make_root_action.rb'
+  apply 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_make_root_action.rb'
   # Add more components
   if yes? "Do this component needs to interact with a Datawedge or a Keyboard emulation scanner?", :red
-    apply 'https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecore_add_datawedge_to_root_action.rb'
+    apply 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_add_datawedge_to_root_action.rb'
   end
 end
 # Run component thecorization
-apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecorize_component.rb"
+apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecorize_component.rb"
 # Make this git more groovy
-apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecore_git_management.rb"
+apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_git_management.rb"
