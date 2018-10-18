@@ -1,5 +1,5 @@
 if File.exists? "config/locales/#{name}.en.yml"
-    copy_file "config/locales/#{name}.en.yml", "config/locales/#{name}.it.yml" 
+    FileUtils.cp "config/locales/#{name}.en.yml", "config/locales/#{name}.it.yml" 
 else
     create_file "config/locales/#{name}.en.yml", "--- \nen: ~\n"
     create_file "config/locales/#{name}.it.yml", "--- \nit: ~\n"
