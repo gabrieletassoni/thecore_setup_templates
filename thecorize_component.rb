@@ -52,4 +52,4 @@ end
 end
 
 # then run thecorize_models
-apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecorize_models.rb"
+apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecorize_models.rb"
