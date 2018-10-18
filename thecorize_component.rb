@@ -1,4 +1,9 @@
-copy_file "config/locales/#{name}.en.yml" "config/locales/#{name}.it.yml"
+if File.exists? "config/locales/#{name}.en.yml"
+    copy_file "config/locales/#{name}.en.yml", "config/locales/#{name}.it.yml" 
+else
+    create_file "config/locales/#{name}.en.yml", "--- \nen: ~\n"
+    create_file "config/locales/#{name}.it.yml", "--- \nit: ~\n"
+end
 # Make the migrations in this engine be directly available to main app
 inject_into_file "lib/#{name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do
 "
