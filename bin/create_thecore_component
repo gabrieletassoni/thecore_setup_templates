@@ -8,7 +8,7 @@ if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then
         echo "ERROR! The file already exists, please use another name." 
         exit 1
     else
-        rails plugin new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/new_thecore_component.rb' --skip-gemfile --skip-bundle -T -O -S -J --full
+        rails plugin new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_component.rb' --skip-gemfile --skip-bundle -T -O -S -J --full
     fi
 else
     echo "ERROR! The name can only contain letters, numbers, - and _" 
