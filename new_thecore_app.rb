@@ -57,4 +57,4 @@ end
 # TODO: remove from application controller the protect_from_forgery with: :exception part
 gsub_file 'app/controllers/application_controller.rb', 'protect_from_forgery with: :exception', ''
 
-apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_thor_scripts/master/thecore_git_management.rb"
+apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_git_management.rb"
