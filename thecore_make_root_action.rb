@@ -1,5 +1,5 @@
 # Remove default declaration
-gsub_file "lib/#{name}.rb", /register_instance_option :object_level do\n.*true\n.*end/m, ''
+gsub_file "lib/#{name}.rb", /register_instance_option :object_level do\n *true\n *end/m, ''
 # Add root skeleton
 inject_into_file "lib/#{name}.rb", after: "RailsAdmin::Config::Actions.register(self)" do
     pivot = "\n"
