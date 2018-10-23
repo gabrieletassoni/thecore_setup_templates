@@ -53,6 +53,8 @@ initializer "load_root_action_for_#{name}.rb" do
     pivot += "end\n"
 end
 
+remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
+
 create_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb" do
     "<%= breadcrumb %>\n"
 end
