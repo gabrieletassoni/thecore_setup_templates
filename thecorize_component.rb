@@ -1,5 +1,6 @@
 if File.exists? "config/locales/#{name}.en.yml"
     FileUtils.cp "config/locales/#{name}.en.yml", "config/locales/#{name}.it.yml" 
+    gsub_file "config/locales/#{name}.it.yml" , /^en:&/, 'it:'
 else
     create_file "config/locales/#{name}.en.yml", "--- \nen: ~\n"
     create_file "config/locales/#{name}.it.yml", "--- \nit: ~\n"
