@@ -48,10 +48,10 @@ remove_file 'public/index.html'
 # *= require thecore to application.css before */
 # //= require thecore to application.js before //= require_tree .
 inject_into_file 'app/assets/javascripts/application.js', before: '//= require_tree .' do
-  "//= require thecore"
+  "//= require thecore\n"
 end
 inject_into_file 'app/assets/stylesheets/application.css', before: '*/ .' do
-  "*= require thecore"
+  "*= require thecore\n"
 end
 
 # TODO: remove from application controller the protect_from_forgery with: :exception part
