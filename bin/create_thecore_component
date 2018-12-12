@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 echo "Please enter component's name:" 
 read COMPNAME
 if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then

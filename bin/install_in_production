@@ -1,0 +1,106 @@
+#!/bin/bash -e
+
+# APP NAME
+while [[ $APPNAME == '' ]]
+do
+    read -p "Please enter this WebApp name: " APPNAME
+done 
+
+# GIT CLONE
+while [[ $GITURL == '' ]]
+do
+    read -p "Please provide the git server domain (i.e. www.taris.it): " GITURL
+done 
+
+mkdir -p ~/www/rails
+cd ~/www/rails/
+git clone "https://$GITURL/git/$APPNAME.git"
+cd "$APPNAME"
+
+# POSTGRESQL
+sudo -u postgres -- psql -c "CREATE USER $APPNAME WITH PASSWORD '$APPNAME';"
+sudo -u postgres -- createdb "$APPNAME"
+sudo -u postgres -- psql -c "grant all privileges on database $APPNAME to $APPNAME"
+
+# WEBAPP PRODUCTION DB
+cat <<EOM | tee config/database.yml
+production:
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  database: $APPNAME
+  username: $APPNAME
+  password: $APPNAME
+EOM
+
+while ! [[ "$YN" =~ ^(y|n)$ ]]
+do
+    read -p "Would you like to setup a private gem repository? (y|n) " YN
+done
+
+if [[ $YN == "y"]]
+then
+    while [[ $GEMURL == '' ]]
+    do
+        read -p "Please provide the gem server domain (i.e. www.taris.it): " GEMURL
+    done 
+
+    while [[ $USERNAME == '' ]]
+    do
+        read -p "Please provide username for $GEMURL gems repository: " USERNAME
+    done 
+
+    while [[ $PASSWORD == '' ]]
+    do
+        read -p "Please provide the password for $USERNAME: " PASSWORD
+    done 
+
+    CREDENTIALS="$(urlencode $USERNAME):$(urlencode $PASSWORD)"
+    gem sources -a "https://$CREDENTIALS@$GEMURL/gems/"
+    bundle config $GEMURL $CREDENTIALS
+fi
+
+# Installing the APP
+while [[ $MASTERKEY == '' ]]
+do
+    read -p "Please enter the master key used to create credentials.key.inc: " MASTERKEY
+done
+
+printf "$MASTERKEY" > config/master.key
+
+bundle install
+RAILS_ENV=production bundle exec rails db:migrate
+RAILS_ENV=production bundle exec rails assets:precompile RAILS_RELATIVE_URL_ROOT="/$APPNAME"
+
+# APACHE CONFIG
+while [[ $RAILSURL == '' ]]
+do
+    read -p "Please provide the base url of which this app will be a subdomain (i.e. https://www.taris.it):" RAILSURL
+done 
+
+CURDIR=$(pwd)
+CURRUBYVER=$(cat $CURDIR/.ruby-version)
+CURGEMSET=$(cat $CURDIR/.ruby-gemset)
+PASSENGERRUBY="$HOME/.rvm/gems/$CURRUBYVER@$CURGEMSET/wrappers/ruby"
+mkdir -p /etc/apache2/custom-confs/
+cat <<EOM | sudo tee /etc/apache2/custom-confs/$APPNAME.conf
+        Alias /$APPNAME $CURDIR/public
+        <Location /$APPNAME>
+                PassengerBaseURI /$APPNAME
+                PassengerAppRoot $CURDIR
+                PassengerRuby $PASSENGERRUBY
+                PassengerFriendlyErrorPages on
+        </Location>
+        <Directory $CURDIR/public>
+                RailsEnv production
+                SetEnv RAILS_RELATIVE_URL_ROOT /$APPNAME
+                SetEnv RAILS_URL $RAILSURL
+                Allow from all
+                Options -MultiViews
+                Require all granted
+        </Directory>
+EOM
+
+sudo service apache2 restart
