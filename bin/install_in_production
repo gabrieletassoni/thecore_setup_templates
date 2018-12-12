@@ -77,30 +77,33 @@ RAILS_ENV=production bundle exec rails assets:precompile RAILS_RELATIVE_URL_ROOT
 # APACHE CONFIG
 while [[ $RAILSURL == '' ]]
 do
-    read -p "Please provide the base url of which this app will be a subdomain (i.e. https://www.taris.it):" RAILSURL
+    read -p "Please provide the base url of which this app will be a subdomain (i.e. www.taris.it):" RAILSURL
 done 
 
 CURDIR=$(pwd)
 CURRUBYVER=$(cat $CURDIR/.ruby-version)
 CURGEMSET=$(cat $CURDIR/.ruby-gemset)
 PASSENGERRUBY="$HOME/.rvm/gems/$CURRUBYVER@$CURGEMSET/wrappers/ruby"
-mkdir -p /etc/apache2/custom-confs/
-cat <<EOM | sudo tee /etc/apache2/custom-confs/$APPNAME.conf
-        Alias /$APPNAME $CURDIR/public
-        <Location /$APPNAME>
-                PassengerBaseURI /$APPNAME
-                PassengerAppRoot $CURDIR
-                PassengerRuby $PASSENGERRUBY
-                PassengerFriendlyErrorPages on
-        </Location>
-        <Directory $CURDIR/public>
-                RailsEnv production
-                SetEnv RAILS_RELATIVE_URL_ROOT /$APPNAME
-                SetEnv RAILS_URL $RAILSURL
-                Allow from all
-                Options -MultiViews
-                Require all granted
-        </Directory>
+cat <<EOM | sudo tee /etc/apache2/sites-available/$APPNAME.conf
+<VirtualHost *:443>
+    ServerName $RAILSURL
+    Alias /$APPNAME $CURDIR/public
+    <Location /$APPNAME>
+            PassengerBaseURI /$APPNAME
+            PassengerAppRoot $CURDIR
+            PassengerRuby $PASSENGERRUBY
+            PassengerFriendlyErrorPages on
+    </Location>
+    <Directory $CURDIR/public>
+            RailsEnv production
+            SetEnv RAILS_RELATIVE_URL_ROOT /$APPNAME
+            SetEnv RAILS_URL https://$RAILSURL
+            Allow from all
+            Options -MultiViews
+            Require all granted
+    </Directory>
+</VirtualHost>
 EOM
 
+sudo a2ensite $APPNAME
 sudo service apache2 restart
