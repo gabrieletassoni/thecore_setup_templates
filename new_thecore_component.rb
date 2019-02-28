@@ -3,9 +3,13 @@
 gsub_file "#{name}.gemspec", 'spec.add_dependency', '# spec.add_dependency'
 gsub_file "#{name}.gemspec", 'spec.add_development_dependency', '# spec.add_development_dependency'
 
-gsub_file "#{name}.gemspec", 'spec.homepage', "spec.homepage = 'https://github.com/gabrieletassoni/thecore' #"
-gsub_file "#{name}.gemspec", 'spec.summary', "spec.summary = 'Thecorized #{name}' #"
-gsub_file "#{name}.gemspec", 'spec.description', "spec.description = 'Thecorized #{name} full description.' #"
+homepage = ask("Please provide url for this component's project page (i.e. https://github.com/gabrieletassoni/#{name})"
+summary = ask('Please provide a short description for this component')
+description = ask('Please provide a longer description for this component')
+
+gsub_file "#{name}.gemspec", 'spec.homepage', "spec.homepage = '#{homepage.presence || "https://github.com/gabrieletassoni/thecore"}' #"
+gsub_file "#{name}.gemspec", 'spec.summary', "spec.summary = '#{summary.presence || "Thecorized #{name}"}' #"
+gsub_file "#{name}.gemspec", 'spec.description', "spec.description = '#{description.presence || "Thecorized #{name} full description."}' #"
 
 # Getting higher version of thecore
 output = run 'gem search ^thecore$ -ra', capture: true
