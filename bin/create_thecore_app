@@ -7,7 +7,33 @@ if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then
     if [ -e "$FULLNAME" ]; then
         echo "ERROR! The file already exists, please use another name." 
     else
-        rails new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_app.rb' --webpack --full
+        rails new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_app.rb' --webpack
+        
+        sudo -u postgres bash -c "psql -c \"CREATE USER $FULLNAME WITH PASSWORD '$FULLNAME';\""
+        sudo -u postgres createdb "${FULLNAME}_development" 
+        sudo -u postgres createdb "${FULLNAME}_test" 
+        sudo -u postgres psql -c "grant all privileges on database ${FULLNAME}_development to $FULLNAME"
+        sudo -u postgres psql -c "grant all privileges on database ${FULLNAME}_test to $FULLNAME"
+        
+        echo "development:
+  adapter: postgresql
+  encoding: unicode
+  database: ${FULLNAME}_development
+  pool: 5
+  username: ${FULLNAME}
+  password: ${FULLNAME}
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: ${FULLNAME}_test
+  pool: 5
+  username: ${FULLNAME}
+  password: ${FULLNAME}" > 'config/database.yml'
+        
+        bundle install
+        rails db:setup
+        rails db:migrate
     fi
 else
     echo "ERROR! The name can only contain letters, numbers, - and _" 
