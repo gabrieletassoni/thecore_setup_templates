@@ -5,9 +5,15 @@ unless File.exists? "config/locales/#{name}.it.yml" # Keep the already existing 
     FileUtils.cp "config/locales/#{name}.en.yml", "config/locales/#{name}.it.yml" 
     gsub_file "config/locales/#{name}.it.yml" , /^en:&/, 'it:'
 end
+js_path = "app/assets/javascripts/#{name}/index.js"
+css_path = "app/assets/stylesheets/#{name}/index.css"
+create_file js_path, "" unless File.exists? js_path # Keep the already existing one
+create_file css_path, "" unless File.exists? css_path # Keep the already existing one
+
 # Make the migrations in this engine be directly available to main app
 inject_into_file "lib/#{name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do
 "
+    config.assets.precompile += %w( #{name}/index.js #{name}/index.css )
     initializer '#{name}.add_to_migrations' do |app|
       unless app.root.to_s == root.to_s
         # APPEND TO MAIN APP MIGRATIONS FROM THIS GEM
