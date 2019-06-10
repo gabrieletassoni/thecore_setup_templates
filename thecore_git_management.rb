@@ -7,11 +7,11 @@ git add: '.gitignore'
 git commit: "-a -m 'Added gitignore'"
 git add: '. -A'
 git commit: "-a -m 'First commit'"
-Dir.chdir('.git/hooks') do
-  begin
-    File.rename('post-update.sample', 'post-update')
-  rescue StandardError
-    nil
-  end
-  system 'chmod +x post-update'
-end
+# Dir.chdir('.git/hooks') do
+#  begin
+#    File.rename('post-update.sample', 'post-update')
+#  rescue StandardError
+#    nil
+#  end
+#  system 'chmod +x post-update'
+# end
