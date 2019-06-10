@@ -10,5 +10,5 @@ if [[ "$COMPNAME"  =~ ^[a-z_-]+$ ]]; then
         rails plugin new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_component.rb' --full
     fi
 else
-    echo "ERROR! The name can only contain letters, numbers, - and _" 
+    echo "ERROR! The name can only contain lowercase letters, - and _" 
 fi
