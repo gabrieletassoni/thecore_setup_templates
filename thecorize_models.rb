@@ -82,7 +82,7 @@ say "Completing Belongs To Associations", :green
         pivot += "end\n"
         pivot += "\n"
         pivot
-    end unless has_rails_admin_declaration entry
+    end unless has_rails_admin_declaration? entry
     # Belongs to
     gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
         match << ", inverse_of: :#{entry.split(".").first.pluralize}"
