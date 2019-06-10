@@ -36,6 +36,7 @@ test:
         bundle install
         # rails db:setup
         rails db:migrate
+        cd ..
     fi
 else
     echo "ERROR! The name can only contain letters, numbers, - and _" 
