@@ -9,16 +9,15 @@ if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then
     else
         rails new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_app.rb' --webpack
         
-        #sudo -u postgres bash -c "psql -c \"CREATE USER $FULLNAME WITH PASSWORD '$FULLNAME';\""
+        # CLEANUPS
+        sudo -u postgres dropdb --if-exists "${FULLNAME}_development"
+        sudo -u postgres dropdb --if-exists "${FULLNAME}_test"
         sudo -u postgres dropuser --if-exists "${FULLNAME}"
+        # CREATIONS
         sudo -u postgres createuser -d "${FULLNAME}"
         sudo -u postgres psql -c "alter user ${FULLNAME} with encrypted password '${FULLNAME}';"
-        sudo -u postgres dropdb --if-exists "${FULLNAME}_development"
         sudo -u postgres createdb -O "${FULLNAME}" "${FULLNAME}_development" 
-        sudo -u postgres dropdb --if-exists "${FULLNAME}_test"
         sudo -u postgres createdb -O "${FULLNAME}" "${FULLNAME}_test" 
-        # sudo -u postgres psql -c "grant all privileges on database ${FULLNAME}_development to $FULLNAME"
-        # sudo -u postgres psql -c "grant all privileges on database ${FULLNAME}_test to $FULLNAME"
         
         echo "development:
   adapter: postgresql
