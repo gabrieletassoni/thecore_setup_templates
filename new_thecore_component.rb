@@ -3,9 +3,9 @@
 gsub_file "#{name}.gemspec", 'spec.add_dependency', '# spec.add_dependency'
 gsub_file "#{name}.gemspec", 'spec.add_development_dependency', '# spec.add_development_dependency'
 
-homepage = ask("Please provide url for this component's project page (i.e. https://github.com/gabrieletassoni/#{name}")
-summary = ask('Please provide a short description for this component')
-description = ask('Please provide a longer description for this component')
+homepage = ask("Please provide url for this component's project page (i.e. https://github.com/gabrieletassoni/#{name}):\n")
+summary = ask("Please provide a short description for this component:\n")
+description = ask("Please provide a longer description for this component:\n')
 
 gsub_file "#{name}.gemspec", 'spec.homepage', "spec.homepage = '#{homepage.presence || "https://github.com/gabrieletassoni/thecore"}' #"
 gsub_file "#{name}.gemspec", 'spec.summary', "spec.summary = '#{summary.presence || "Thecorized #{name}"}' #"
