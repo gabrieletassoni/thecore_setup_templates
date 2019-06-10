@@ -46,9 +46,15 @@ def has_has_many_association? file, assoc
     (File.readlines(file).grep(Regexp.new(reg_def)).size > 0) rescue false
 end
 
+loop do
+    model_declaration = ask("Please enter a model declaration or NONE if you don't need new models: ")
+    break if model_declaration.upcase == "NONE"
+    generate(:model, model_declaration)
+end
+
 # Dir.chdir 'app/models' do
 # Getting all the models that are activerecords:
-Dir.chdir('app/models') do
+inside('app/models') do
     @model_files = Dir.glob('*.rb').map do |model|
         "app/models/#{model}" if is_applicationrecord?(model) || is_activerecord?(model)
     end.compact 
@@ -190,3 +196,6 @@ say "Detect polymorphic Associations", :green
         end
     end
 end
+
+
+rails_command "db:migrate"
