@@ -48,9 +48,11 @@ end
 
 # Dir.chdir 'app/models' do
 # Getting all the models that are activerecords:
-@model_files = Dir.glob('app/models/*.rb').map do |model|
-    model if is_applicationrecord?(model) || is_activerecord?(model)
-end.compact
+Dir.chdir('app/models') do
+    @model_files = Dir.glob('*.rb').map do |model|
+        "app/models/#{model}" if is_applicationrecord?(model) || is_activerecord?(model)
+    end.compact 
+end
 # end
 
 say "Found these models: #{@model_files.join("; ")}"
