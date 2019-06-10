@@ -13,17 +13,9 @@ gsub_file "#{name}.gemspec", 'spec.description', "spec.description = '#{descript
 
 # Getting higher version of thecore
 output = run 'gem search ^thecore$ -ra', capture: true
-versions = (begin
-              output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(', ')
-            rescue StandardError
-              []
-            end)
+versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(', ') rescue [])
+version = "~> #{versions.first.split('.').first(2).join('.') rescue '1.0'}"
 
-version = "~> #{begin
-                  versions.first.split('.').first(2).join('.')
-                rescue StandardError
-                  '1.0'
-                end}"
 inject_into_file "#{name}.gemspec", before: /^end/ do
 "  spec.add_dependency 'thecore', '#{version}'\n"
 end
