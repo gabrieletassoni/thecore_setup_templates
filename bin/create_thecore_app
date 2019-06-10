@@ -36,6 +36,7 @@ test:
   username: ${FULLNAME}
   password: ${FULLNAME}" > "${FULLNAME}/config/database.yml"
   
+        echo "${FULLNAME}" > "${FULLNAME}/.ruby-gemset"
         cd "$FULLNAME"        
         bundle install
         # rails db:setup
