@@ -53,12 +53,15 @@ end
 end.compact
 # end
 
+say "Found these models: #{@model_files.join("; ")}"
+
 say "Replace ActiveRecord::Base with ApplicationRecord", :green
 say "Add rails_admin declaration only in files which are ActiveRecords and don't already have that declaration", :green
 say "Completing Belongs To Associations", :green
 # For each model in this gem
 @model_files.each do |entry|
     # It must be a class and don't have rails_admin declaration
+    say "Working on: #{entry}"
     gsub_file entry, "ActiveRecord::Base", "ApplicationRecord"
     # Rails admin
     inject_into_file entry, before: /^end/ do
