@@ -2,8 +2,7 @@ unless File.exists? "config/locales/#{name}.en.yml" # Keep the already existing 
     create_file "config/locales/#{name}.en.yml", "--- \nen:\n  admin:\n    actions:\n      #{name}:\n        menu: #{name.titleize}\n        breadcrumb: #{name.titleize}\n        title: #{name.titleize}"
 end
 unless File.exists? "config/locales/#{name}.it.yml" # Keep the already existing one
-    FileUtils.cp "config/locales/#{name}.en.yml", "config/locales/#{name}.it.yml" 
-    gsub_file "config/locales/#{name}.it.yml" , /^en:&/, 'it:'
+    create_file "config/locales/#{name}.it.yml", "--- \nit:\n  admin:\n    actions:\n      #{name}:\n        menu: #{name.titleize}\n        breadcrumb: #{name.titleize}\n        title: #{name.titleize}"
 end
 js_path = "app/assets/javascripts/#{name}/index.js"
 css_path = "app/assets/stylesheets/#{name}/index.css"
