@@ -197,5 +197,4 @@ say "Detect polymorphic Associations", :green
     end
 end
 
-
-rails_command "db:migrate"
+# rails_command "db:migrate"
