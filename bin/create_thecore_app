@@ -34,7 +34,7 @@ test:
   
         cd "$FULLNAME"        
         bundle install
-        rails db:setup
+        # rails db:setup
         rails db:migrate
     fi
 else
