@@ -43,5 +43,5 @@ test:
         cd ..
     fi
 else
-    echo "ERROR! The name can only contain letters, numbers, - and _" 
+    echo "ERROR! The name can only contain lowercase letters, - and _" 
 fi
