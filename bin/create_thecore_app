@@ -9,7 +9,8 @@ if [[ "$COMPNAME"  =~ ^[a-zA-Z0-9_-]+$ ]]; then
     else
         rails new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_app.rb' --webpack
         
-        sudo -u postgres bash -c "psql -c \"CREATE USER $FULLNAME WITH PASSWORD '$FULLNAME';\""
+        #sudo -u postgres bash -c "psql -c \"CREATE USER $FULLNAME WITH PASSWORD '$FULLNAME';\""
+        sudo -u postgres psql -c "CREATE USER $FULLNAME WITH PASSWORD '$FULLNAME';"
         sudo -u postgres createdb "${FULLNAME}_development" 
         sudo -u postgres createdb "${FULLNAME}_test" 
         sudo -u postgres psql -c "grant all privileges on database ${FULLNAME}_development to $FULLNAME"
@@ -29,8 +30,9 @@ test:
   database: ${FULLNAME}_test
   pool: 5
   username: ${FULLNAME}
-  password: ${FULLNAME}" > 'config/database.yml'
-        
+  password: ${FULLNAME}" > "${FULLNAME}/config/database.yml"
+  
+        cd "$FULLNAME"        
         bundle install
         rails db:setup
         rails db:migrate
