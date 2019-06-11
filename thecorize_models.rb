@@ -92,51 +92,83 @@ inside('./') do
     end
 end
 
-def add_has_many_to_model_or_concern name, has_many_model, inverse_of, through = nil
-    associated_file = File.join("app", "models", "#{inverse_of.singularize}.rb")
+def add_has_many_to_model_or_concern name, associated_model, this_model, through_model = nil
+    # In the end I need to create something like:
+    # THROUGH VERSION:
+    # class this_model < ApplicationRecord
+    #     has_many associated_model.pluralize, inverse_of: this_model.singularize, dependent: :destroy
+    #     has_many associated_model.pluralize, through: through_model.pluralize, inverse_of: this_model.pluralize
+    # end
+    # SIMPLE VERSION:
+    # class this_model < ApplicationRecord
+    #     has_many associated_model.pluralize, inverse_of: this_model.singularize, dependent: :destroy
+    # end
+    associated_file = File.join("app", "models", "#{this_model.singularize}.rb")
     say "Looking if association model exists: #{associated_file}"
     if File.exists?(associated_file)
         # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
         # if true, check that the association is non existent and add the association to that file
         inject_into_file associated_file, after: " < ApplicationRecord\n" do
-            "\n    has_many :#{has_many_model}, inverse_of: :#{inverse_of}, dependent: :destroy\n" if through.blank?
-            "\n    has_many :#{has_many_model}, through: :#{through}, inverse_of: :#{inverse_of}\n" unless through.blank?
-        end unless has_has_many_association?(associated_file, has_many_model)
+            "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
+            "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+        end unless has_has_many_association?(associated_file, associated_model.pluralize)
     else
         # otherwise (the file does not exist) check if the initializer for concerns exists,
         # For each model in this gem
-        initializer_name = "associations_#{name}_#{inverse_of}_concern.rb"
+        initializer_name = "associations_#{name}_#{this_model.singularize}_concern.rb"
         initializer initializer_name do
             pivot = "require 'active_support/concern'\n"
             pivot += "\n"
-            pivot += "module #{inverse_of.classify}AssociationsConcern\n"
+            pivot += "module #{this_model.singularize.classify}AssociationsConcern\n"
             pivot += "    extend ActiveSupport::Concern\n"
             pivot += "    included do\n"
             pivot += "    end\n"
             pivot += "end\n"
             pivot += "\n"
             pivot += "# include the extension\n"
-            pivot += "# #{inverse_of.classify}.send(:include, #{inverse_of.classify}AssociationsConcern)\n"
+            pivot += "# #{this_model.singularize.classify}.send(:include, #{this_model.singularize.classify}AssociationsConcern)\n"
             pivot += "\n"
         end unless File.exists?(File.join("config/initializers", initializer_name))
 
         # AGGIUNGO L'INCLUDE
         say "Adding after_initialize file"
-        after_initialize_file_name = "after_initialize_for_#{@name}.rb"
+        after_initialize_file_name = "after_initialize_for_#{name}.rb"
         after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
         initializer after_initialize_file_name do
             "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
         end unless File.exists?(after_initialize_file_fullpath)
+
         inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
-            "\n    #{inverse_of.classify}.send(:include, #{inverse_of.classify}AssociationsConcern)\n"
+            "\n    #{this_model.singularize.classify}.send(:include, #{this_model.singularize.classify}AssociationsConcern)\n"
         end
 
         # then add to it the has_many declaration
         # TODO: only if it doesn't already exists
         inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
-            "\n    has_many :#{has_many_model}, inverse_of: :#{inverse_of}, dependent: :destroy\n" if through.blank?
-            "\n    has_many :#{has_many_model}, through: :#{through}, inverse_of: :#{inverse_of}\n" unless through.blank?
+            "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
+            "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
         end if File.exists?(File.join("config/initializers", initializer_name))
+    end
+end
+
+say "Add Has Many Through Associations", :green
+# I'ts just an approximation, but for now it could work
+inside('./') do
+    @model_files.each do |model|
+        association_model = model.split(".").first.split("/").last
+        file = File.join(model)
+        # It must be an activerecord model class
+        model_with_belongs_to = File.readlines(file).grep(/^[ \t]*belongs_to :.*$/)
+        if model_with_belongs_to.size == 2
+            if yes?("Is #{association_model} an association model for a has_many through relation?", :red)
+                # getting both the belongs_to models, find their model files, and add the through to each other
+                left_side = model_with_belongs_to.first[/:(.*?),/,1]
+                right_side = model_with_belongs_to.last[/:(.*?),/,1]
+                # This side of the through
+                add_has_many_to_model_or_concern name, right_side, left_side, association_model
+                add_has_many_to_model_or_concern name, left_side, right_side, association_model
+            end
+        end
     end
 end
 
@@ -151,34 +183,14 @@ inside('./') do
 
             # Polymorphic must be managed manually
             File.readlines(file).grep(/^(?!.*polymorphic.*)^[ \t]*belongs_to :(.*),.+/).each do |a|
-                target_association = a[/:(.*?),/,1]
+                this_model = a[/:(.*?),/,1]
                 # look if the file identified by association .rb exists
-                associated_file = File.join("app/models","#{target_association}.rb")
-                starting_model = entry.split(".").first.pluralize
+                # associated_file = File.join("app/models","#{target_association}.rb")
+                associated_model = entry.split(".").first.pluralize
                 # say "Found belongs_to association: #{target_association} for the model: #{starting_model}", :green
                 # say "- Looking for model file: #{associated_file}", :green
-                add_has_many_to_model_or_concern name, starting_model, associated_file, target_association
-            end
-        end
-    end
-end
-
-say "Add Has Many Through Associations", :green
-# I'ts just an approximation, but for now it could work
-inside('./') do
-    @model_files.each do |model|
-        association_model = model.split(".").first
-        file = File.join(model)
-        # It must be an activerecord model class
-        model_with_belongs_to = File.readlines(file).grep(/^[ \t]*belongs_to :.*$/)
-        if model_with_belongs_to.size == 2
-            if yes?("Is #{association_model} an association model for a has_many through relation?", :red)
-                # getting both the belongs_to models, find their model files, and add the through to each other
-                left_side = model_with_belongs_to.first[/:(.*?),/,1]
-                right_side = model_with_belongs_to.last[/:(.*?),/,1]
-                # This side of the through
-                add_has_many_to_model_or_concern name, right_side.pluralize, left_side.pluralize, association_model.pluralize
-                add_has_many_to_model_or_concern name, left_side.pluralize, right_side.pluralize, association_model.pluralize
+                # add_has_many_to_model_or_concern name, associated_model, this_model
+                add_has_many_to_model_or_concern name, associated_model, this_model
             end
         end
     end
