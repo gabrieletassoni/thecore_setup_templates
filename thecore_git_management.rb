@@ -7,6 +7,8 @@ git add: '.gitignore'
 git commit: "-a -m 'Added gitignore'"
 git add: '. -A'
 git commit: "-a -m 'First commit'"
+remote_origin = ask("Please provide git repository for this gem, leave empty for not providing one:\n", :green)
+git remote: "add origin #{remote_origin}" unless remote_origin.blank?
 # Dir.chdir('.git/hooks') do
 #  begin
 #    File.rename('post-update.sample', 'post-update')
