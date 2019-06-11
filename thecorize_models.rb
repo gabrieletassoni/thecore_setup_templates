@@ -89,34 +89,6 @@ say "Completing Belongs To Associations", :green
     end
 end
 
-say "Add Has Many Through Associations", :green
-# I'ts just an approximation, but for now it could work
-inside('./') do
-    @model_files.each do |model|
-        association_model = model.split(".").first
-        file = File.join(model)
-        # It must be an activerecord model class
-        model_with_belongs_to = File.readlines(file).grep(/^[ \t]*belongs_to :.*$/)
-        if model_with_belongs_to.size == 2
-            if yes?("Is #{association_model} an association model for a has_many through relation?", :red)
-                # getting both the belongs_to models, find their model files, and add the through to each other
-                left_side = model_with_belongs_to.first[/:(.*?),/,1]
-                right_side = model_with_belongs_to.last[/:(.*?),/,1]
-                # This side of the through
-                inject_into_file File.join("app/models", "#{left_side}.rb"), after: " < ApplicationRecord\n" do
-                    #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
-                    "    has_many :#{right_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{left_side.pluralize}"
-                end
-                # Other side of the through
-                inject_into_file File.join("app/models", "#{right_side}.rb"), after: " < ApplicationRecord\n" do
-                    #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
-                    "    has_many :#{left_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{right_side.pluralize}"
-                end
-            end
-        end
-    end
-end
-
 say "Add Has Many Associations", :green
 # For each model in this gem
 inside('./') do
@@ -174,6 +146,34 @@ inside('./') do
                     inject_into_file File.join(@plugin_initializers_dir, initializer_name), after: "included do\n" do
                         "\n     has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
                     end
+                end
+            end
+        end
+    end
+end
+
+say "Add Has Many Through Associations", :green
+# I'ts just an approximation, but for now it could work
+inside('./') do
+    @model_files.each do |model|
+        association_model = model.split(".").first
+        file = File.join(model)
+        # It must be an activerecord model class
+        model_with_belongs_to = File.readlines(file).grep(/^[ \t]*belongs_to :.*$/)
+        if model_with_belongs_to.size == 2
+            if yes?("Is #{association_model} an association model for a has_many through relation?", :red)
+                # getting both the belongs_to models, find their model files, and add the through to each other
+                left_side = model_with_belongs_to.first[/:(.*?),/,1]
+                right_side = model_with_belongs_to.last[/:(.*?),/,1]
+                # This side of the through
+                inject_into_file File.join("app/models", "#{left_side}.rb"), after: " < ApplicationRecord\n" do
+                    #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
+                    "    has_many :#{right_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{left_side.pluralize}"
+                end
+                # Other side of the through
+                inject_into_file File.join("app/models", "#{right_side}.rb"), after: " < ApplicationRecord\n" do
+                    #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
+                    "    has_many :#{left_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{right_side.pluralize}"
                 end
             end
         end
