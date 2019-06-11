@@ -1,8 +1,10 @@
-unless File.exists? "config/locales/#{name}.en.yml" # Keep the already existing one
-    create_file "config/locales/#{name}.en.yml", "--- \nen:\n  admin:\n    actions:\n      #{name}:\n        menu: #{name.titleize}\n        breadcrumb: #{name.titleize}\n        title: #{name.titleize}"
-end
-unless File.exists? "config/locales/#{name}.it.yml" # Keep the already existing one
-    create_file "config/locales/#{name}.it.yml", "--- \nit:\n  admin:\n    actions:\n      #{name}:\n        menu: #{name.titleize}\n        breadcrumb: #{name.titleize}\n        title: #{name.titleize}"
+inside "./" do
+    unless File.exists? "config/locales/#{name}.en.yml" # Keep the already existing one
+        create_file "config/locales/#{name}.en.yml", "--- \nen:\n  admin:\n    actions:\n      #{name}:\n        menu: #{name.titleize}\n        breadcrumb: #{name.titleize}\n        title: #{name.titleize}"
+    end
+    unless File.exists? "config/locales/#{name}.it.yml" # Keep the already existing one
+        create_file "config/locales/#{name}.it.yml", "--- \nit:\n  admin:\n    actions:\n      #{name}:\n        menu: #{name.titleize}\n        breadcrumb: #{name.titleize}\n        title: #{name.titleize}"
+    end
 end
 js_path = "app/assets/javascripts/#{name}/index.js"
 css_path = "app/assets/stylesheets/#{name}/index.css"

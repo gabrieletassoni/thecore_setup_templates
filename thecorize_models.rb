@@ -6,7 +6,7 @@ def ask_question_multiple_choice models, question = "Choose among one of these, 
     while (answer ||= "") != "cancel"
       remaining_models = (models-return_array)
       break if remaining_models.empty?
-      answer = ask question, :red, limited_to: remaining_models.push("cancel").uniq
+      answer = ask(question, :green, :bold, limited_to: remaining_models.push("cancel").uniq)
       break if answer == "cancel"
       return_array.push answer
     end
@@ -47,7 +47,7 @@ def has_has_many_association? file, assoc
 end
 
 loop do
-    model_declaration = ask("Please enter a model declaration or NONE if you don't need new models: ", :green)
+    model_declaration = ask("Please enter a model declaration or NONE if you don't need new models:\n", :green, :bold)
     break if model_declaration.upcase == "NONE"
     generate(:model, model_declaration)
 end
@@ -65,27 +65,76 @@ say "Found these models: #{@model_files.join("; ")}"
 
 say "Replace ActiveRecord::Base with ApplicationRecord", :green
 say "Add rails_admin declaration only in files which are ActiveRecords and don't already have that declaration", :green
+
 say "Completing Belongs To Associations", :green
 # For each model in this gem
-@model_files.each do |entry|
-    # It must be a class and don't have rails_admin declaration
-    say "Working on: #{entry}"
-    gsub_file entry, "ActiveRecord::Base", "ApplicationRecord"
-    # Rails admin
-    inject_into_file entry, before: /^end/ do
-        pivot = "\n"
-        pivot += "RailsAdmin.config do |config|\n"
-        pivot += "   config.model self.name.underscore.capitalize.classify do\n"
-        pivot += "       navigation_label I18n.t('admin.settings.label')\n"
-        pivot += "       navigation_icon 'fa fa-file'\n"
-        pivot += "    end\n"
-        pivot += "end\n"
-        pivot += "\n"
-        pivot
-    end unless has_rails_admin_declaration? entry
-    # Belongs to
-    gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
-        match << ", inverse_of: :#{entry.split(".").first.pluralize}"
+inside('./') do
+    @model_files.each do |entry|
+        # It must be a class and don't have rails_admin declaration
+        say "Working on: #{entry}"
+        gsub_file entry, "ActiveRecord::Base", "ApplicationRecord"
+        # Rails admin
+        inject_into_file entry, before: /^end/ do
+            pivot = "\n"
+            pivot += "RailsAdmin.config do |config|\n"
+            pivot += "   config.model self.name.underscore.capitalize.classify do\n"
+            pivot += "       navigation_label I18n.t('admin.settings.label')\n"
+            pivot += "       navigation_icon 'fa fa-file'\n"
+            pivot += "    end\n"
+            pivot += "end\n"
+            pivot += "\n"
+            pivot
+        end unless has_rails_admin_declaration? entry
+        # Belongs to
+        gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
+            match << ", inverse_of: :#{entry.split(".").first.pluralize}"
+        end
+    end
+end
+
+def add_has_many_to_model_or_concern name, has_many_model, associated_file, inverse_of, through = nil
+    if File.exists?(associated_file)
+        # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
+        # if true, check that the association is non existent and add the association to that file
+        inject_into_file associated_file, after: " < ApplicationRecord\n" do
+            "\n    has_many :#{has_many_model}, inverse_of: :#{inverse_of}, dependent: :destroy\n" if through.blank?
+            "\n    has_many :#{has_many_model}, through: :#{through}, inverse_of: :#{inverse_of}\n" unless through.blank?
+        end unless has_has_many_association?(associated_file, has_many_model)
+    else
+        # otherwise (the file does not exist) check if the initializer for concerns exists,
+        # For each model in this gem
+        initializer_name = "associations_#{name}_#{inverse_of}_concern.rb"
+        initializer initializer_name do
+            pivot = "require 'active_support/concern'\n"
+            pivot += "\n"
+            pivot += "module #{inverse_of.classify}AssociationsConcern\n"
+            pivot += "    extend ActiveSupport::Concern\n"
+            pivot += "    included do\n"
+            pivot += "    end\n"
+            pivot += "end\n"
+            pivot += "\n"
+            pivot += "# include the extension\n"
+            pivot += "# #{inverse_of.classify}.send(:include, #{inverse_of.classify}AssociationsConcern)\n"
+            pivot += "\n"
+        end unless File.exists?(File.join("config/initializers", initializer_name))
+
+        # AGGIUNGO L'INCLUDE
+        say "Adding after_initialize file"
+        after_initialize_file_name = "after_initialize_for_#{@name}.rb"
+        after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
+        initializer after_initialize_file_name do
+            "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
+        end unless File.exists?(after_initialize_file_fullpath)
+        inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
+            "\n    #{inverse_of.classify}.send(:include, #{inverse_of.classify}AssociationsConcern)\n"
+        end
+
+        # then add to it the has_many declaration
+        # TODO: only if it doesn't already exists
+        inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
+            "\n    has_many :#{has_many_model}, inverse_of: :#{inverse_of}, dependent: :destroy\n" if through.blank?
+            "\n    has_many :#{has_many_model}, through: :#{through}, inverse_of: :#{inverse_of}\n" unless through.blank?
+        end if File.exists?(File.join("config/initializers", initializer_name))
     end
 end
 
@@ -106,47 +155,7 @@ inside('./') do
                 starting_model = entry.split(".").first.pluralize
                 # say "Found belongs_to association: #{target_association} for the model: #{starting_model}", :green
                 # say "- Looking for model file: #{associated_file}", :green
-                if File.exists?(associated_file)
-                    # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
-                    # if true, check that the association is non existent and add the association to that file
-                    inject_into_file associated_file, after: " < ApplicationRecord\n" do
-                        "\n\t\thas_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
-                    end unless has_has_many_association?(associated_file, starting_model)
-                else
-                    # otherwise (the file does not exist) check if the initializer for concerns exists,
-                    # For each model in this gem
-                    initializer_name = "associations_#{name}_#{target_association}_concern.rb"
-                    initializer initializer_name do
-                        pivot = "require 'active_support/concern'\n"
-                        pivot += "\n"
-                        pivot += "module #{target_association.classify}AssociationsConcern\n"
-                        pivot += "   extend ActiveSupport::Concern\n"
-                        pivot += "   included do\n"
-                        pivot += "   end\n"
-                        pivot += "end\n"
-                        pivot += "\n"
-                        pivot += "# include the extension\n"
-                        pivot += "# #{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)\n"
-                        pivot += "\n"
-                    end unless File.exists?(File.join("config/initializers", initializer_name))
-
-                    # AGGIUNGO L'INCLUDE
-                    say "Adding after_initialize file", :green
-                    after_initialize_file_name = "after_initialize_for_#{@name}.rb"
-                    after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
-                    initializer after_initialize_file_name do
-                        "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
-                    end unless File.exists?(after_initialize_file_fullpath)
-                    inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
-                        "\n\t\t#{target_association.classify}.send(:include, #{target_association.classify}AssociationsConcern)\n"
-                    end
-
-                    # then add to it the has_many declaration
-                    # TODO: only if it doesn't already exists
-                    inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
-                        "\n     has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
-                    end if File.exists?(File.join("config/initializers", initializer_name))
-                end
+                add_has_many_to_model_or_concern name, starting_model, associated_file, target_association
             end
         end
     end
@@ -166,15 +175,8 @@ inside('./') do
                 left_side = model_with_belongs_to.first[/:(.*?),/,1]
                 right_side = model_with_belongs_to.last[/:(.*?),/,1]
                 # This side of the through
-                inject_into_file File.join("app/models", "#{left_side}.rb"), after: " < ApplicationRecord\n" do
-                    #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
-                    "    has_many :#{right_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{left_side.pluralize}"
-                end if File.exists?(File.join("app/models", "#{left_side}.rb"))
-                # Other side of the through
-                inject_into_file File.join("app/models", "#{right_side}.rb"), after: " < ApplicationRecord\n" do
-                    #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
-                    "    has_many :#{left_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{right_side.pluralize}"
-                end if File.exists?(File.join("app/models", "#{left_side}.rb"))
+                add_has_many_to_model_or_concern name, right_side.pluralize, left_side.pluralize, left_side.pluralize, association_model.pluralize
+                add_has_many_to_model_or_concern name, left_side.pluralize, right_side.pluralize, right_side.pluralize, association_model.pluralize
             end
         end
     end
