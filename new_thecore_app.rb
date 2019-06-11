@@ -1,16 +1,19 @@
 require 'open-uri'
-# Asking which thecore gem to install
-output = run 'gem search ^thecore$ -ra', capture: true
-versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(', ') rescue [] )
 
-version = "~> #{versions.first.split('.').first(2).join('.') rescue '1.0' }"
-say "Installing thecore version #{version}"
-gem 'thecore', version # , path: '../../thecore_project/thecore'
+def add_gem gem_name
+  output = run "gem search ^#{gem_name}$ -ra", capture: true
+  versions = (output.match(/^[\s\t]*#{gem_name} \((.*)\)/)[1].split(', ') rescue [] )
+
+  version = "~> #{versions.first.split('.').first(2).join('.') rescue '1.0' }"
+  say "Installing #{gem_name} version #{version}"
+  gem gem_name, version, require: gem_name # , path: '../../thecore_project/thecore'
+end
 
 # Adding base gems
-gem 'thecore_settings', '~> 1.1', require: 'thecore_settings'
+add_gem "thecore"
+add_gem 'thecore_settings'
 # Do you want REST API?
-gem 'thecore_api', '~> 1.1', require: 'thecore_api' if yes? 'Do you want REST API capability for your thecore application?', :red
+add_gem 'thecore_api' if yes?('Do you want REST API capability for your thecore application?', :green, :bold)
 
 # Asking which thecore theme to install
 output = run 'gem search ^thecore_.*$ -ra', capture: true
