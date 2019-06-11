@@ -542,5 +542,5 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
-
+.passwords
 # End of https://www.gitignore.io/api/osx,ruby,linux,rails,windows,sublimetext,visualstudio,visualstudiocode
