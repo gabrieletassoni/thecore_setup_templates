@@ -109,8 +109,9 @@ def add_has_many_to_model_or_concern name, associated_model, this_model, through
         # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
         # if true, check that the association is non existent and add the association to that file
         inject_into_file associated_file, after: " < ApplicationRecord\n" do
-            "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
-            "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+            pivot = "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
+            pivot = "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+            pivot
         end unless has_has_many_association?(associated_file, associated_model.pluralize)
     else
         # otherwise (the file does not exist) check if the initializer for concerns exists,
@@ -128,6 +129,7 @@ def add_has_many_to_model_or_concern name, associated_model, this_model, through
             pivot += "# include the extension\n"
             pivot += "# #{this_model.singularize.classify}.send(:include, #{this_model.singularize.classify}AssociationsConcern)\n"
             pivot += "\n"
+            pivot
         end unless File.exists?(File.join("config/initializers", initializer_name))
 
         # AGGIUNGO L'INCLUDE
@@ -145,8 +147,9 @@ def add_has_many_to_model_or_concern name, associated_model, this_model, through
         # then add to it the has_many declaration
         # TODO: only if it doesn't already exists
         inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
-            "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
-            "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+            pivot = "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
+            pivot = "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+            pivot
         end if File.exists?(File.join("config/initializers", initializer_name))
     end
 end
