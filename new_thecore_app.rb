@@ -1,17 +1,9 @@
 require 'open-uri'
 # Asking which thecore gem to install
 output = run 'gem search ^thecore$ -ra', capture: true
-versions = (begin
-              output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(', ')
-            rescue StandardError
-              []
-            end)
+versions = (output.match(/^[\s\t]*thecore \((.*)\)/)[1].split(', ') rescue [] )
 
-version = "~> #{begin
-                  versions.first.split('.').first(2).join('.')
-                rescue StandardError
-                  '1.0'
-                end}"
+version = "~> #{versions.first.split('.').first(2).join('.') rescue '1.0' }"
 say "Installing thecore version #{version}"
 gem 'thecore', version # , path: '../../thecore_project/thecore'
 
@@ -34,6 +26,8 @@ theme = ask("Which theme for thecore do you want to use?\n", :green, :bold, limi
 say "You selected #{theme}"
 gem theme, themes[theme], require: theme
 
+get "https://raw.githubusercontent.com/rails/webpacker/master/lib/install/config/webpacker.yml", "config/webpacker.yml"
+run 'rails webpacker:install'
 # Run bundle
 run 'bundle'
 
