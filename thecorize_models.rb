@@ -92,7 +92,9 @@ inside('./') do
     end
 end
 
-def add_has_many_to_model_or_concern name, has_many_model, associated_file, inverse_of, through = nil
+def add_has_many_to_model_or_concern name, has_many_model, inverse_of, through = nil
+    associated_file = File.join("app", "models", "#{inverse_of.singularize}.rb")
+    say "Looking if association model exists: #{associated_file}"
     if File.exists?(associated_file)
         # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
         # if true, check that the association is non existent and add the association to that file
@@ -175,8 +177,8 @@ inside('./') do
                 left_side = model_with_belongs_to.first[/:(.*?),/,1]
                 right_side = model_with_belongs_to.last[/:(.*?),/,1]
                 # This side of the through
-                add_has_many_to_model_or_concern name, right_side.pluralize, left_side.pluralize, left_side.pluralize, association_model.pluralize
-                add_has_many_to_model_or_concern name, left_side.pluralize, right_side.pluralize, right_side.pluralize, association_model.pluralize
+                add_has_many_to_model_or_concern name, right_side.pluralize, left_side.pluralize, association_model.pluralize
+                add_has_many_to_model_or_concern name, left_side.pluralize, right_side.pluralize, association_model.pluralize
             end
         end
     end
