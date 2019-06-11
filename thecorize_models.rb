@@ -87,7 +87,7 @@ inside('./') do
         end unless has_rails_admin_declaration? entry
         # Belongs to
         gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
-            match << ", inverse_of: :#{entry.split(".").first.pluralize}"
+            match << ", inverse_of: :#{entry.split(".").first.split("/").last.pluralize}"
         end
     end
 end
@@ -215,7 +215,7 @@ inside('./') do
             answers.each do |answer|
                 # Add the polymorphic has_name declaration
                 inject_into_file File.join("app/models", answer), after: " < ApplicationRecord\n" do
-                    "   has_many :#{model.split(".").first.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.singularize}, dependent: :destroy"
+                    "\n    has_many :#{model.split(".").first.split("/").last.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.split("/").last.singularize}, dependent: :destroy"
                 end if File.exists?(File.join("app/models", answer))
             end
         end
