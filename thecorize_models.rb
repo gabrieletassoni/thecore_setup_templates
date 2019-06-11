@@ -189,7 +189,7 @@ inside('./') do
                 this_model = a[/:(.*?),/,1]
                 # look if the file identified by association .rb exists
                 # associated_file = File.join("app/models","#{target_association}.rb")
-                associated_model = entry.split(".").first.pluralize
+                associated_model = entry.split(".").first.split("/").last.pluralize
                 # say "Found belongs_to association: #{target_association} for the model: #{starting_model}", :green
                 # say "- Looking for model file: #{associated_file}", :green
                 # add_has_many_to_model_or_concern name, associated_model, this_model
