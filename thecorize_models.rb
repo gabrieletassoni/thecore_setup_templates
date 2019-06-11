@@ -145,7 +145,7 @@ inside('./') do
                     # TODO: only if it doesn't already exists
                     inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
                         "\n     has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
-                    end
+                    end if File.exists?(File.join("config/initializers", initializer_name))
                 end
             end
         end
@@ -169,12 +169,12 @@ inside('./') do
                 inject_into_file File.join("app/models", "#{left_side}.rb"), after: " < ApplicationRecord\n" do
                     #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
                     "    has_many :#{right_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{left_side.pluralize}"
-                end
+                end if File.exists?(File.join("app/models", "#{left_side}.rb"))
                 # Other side of the through
                 inject_into_file File.join("app/models", "#{right_side}.rb"), after: " < ApplicationRecord\n" do
                     #has_many :rooms, through: :chosen_rooms, inverse_of: :chosen_decks
                     "    has_many :#{left_side.pluralize}, through: :#{association_model.pluralize}, inverse_of: :#{right_side.pluralize}"
-                end
+                end if File.exists?(File.join("app/models", "#{left_side}.rb"))
             end
         end
     end
@@ -197,7 +197,7 @@ inside('./') do
                 # Add the polymorphic has_name declaration
                 inject_into_file File.join("app/models", answer), after: " < ApplicationRecord\n" do
                     "   has_many :#{model.split(".").first.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.singularize}, dependent: :destroy"
-                end
+                end if File.exists?(File.join("app/models", answer))
             end
         end
     end
