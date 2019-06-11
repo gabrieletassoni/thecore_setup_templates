@@ -143,7 +143,7 @@ inside('./') do
 
                     # then add to it the has_many declaration
                     # TODO: only if it doesn't already exists
-                    inject_into_file File.join(@plugin_initializers_dir, initializer_name), after: "included do\n" do
+                    inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
                         "\n     has_many :#{starting_model}, inverse_of: :#{target_association}, dependent: :destroy\n"
                     end
                 end
