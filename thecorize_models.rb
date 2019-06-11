@@ -47,7 +47,7 @@ def has_has_many_association? file, assoc
 end
 
 loop do
-    model_declaration = ask("Please enter a model declaration or NONE if you don't need new models: ")
+    model_declaration = ask("Please enter a model declaration or NONE if you don't need new models: ", :green)
     break if model_declaration.upcase == "NONE"
     generate(:model, model_declaration)
 end
