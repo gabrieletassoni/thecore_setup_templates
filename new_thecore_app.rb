@@ -16,6 +16,8 @@ loop do
 end
 
 # Adding base gems
+add_gem 'rails-erd', group: :development
+
 add_gem "thecore"
 add_gem 'thecore_settings'
 # Do you want REST API?
@@ -39,6 +41,7 @@ get "https://raw.githubusercontent.com/rails/webpacker/master/lib/install/config
 run 'rails webpacker:install'
 # Run bundle
 run 'bundle'
+run 'bundle exec rails g erd:install'
 
 # remove the index.html
 remove_file 'public/index.html'
