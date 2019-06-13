@@ -9,6 +9,12 @@ def add_gem gem_name
   gem gem_name, version, require: gem_name # , path: '../../thecore_project/thecore'
 end
 
+loop do
+  answr = ask "Would you like to add a private source to the Gemfile (i.e. http://code.whytheluckystiff.net)? Answer NONE to skip this step.\n", :green, :bold
+  break if answr.upcase == "NONE"
+  add_source answr
+end
+
 # Adding base gems
 add_gem "thecore"
 add_gem 'thecore_settings'
