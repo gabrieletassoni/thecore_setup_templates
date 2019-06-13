@@ -48,8 +48,8 @@ Temporary Items
 *.rbc
 capybara-*.html
 .rspec
-/log
-/tmp
+/log/*
+/tmp/*
 /db/*.sqlite3
 /db/*.sqlite3-journal
 /public/system
@@ -233,9 +233,9 @@ $RECYCLE.BIN/
 x64/
 x86/
 bld/
-[Bb]in/
+# [Bb]in/
 [Oo]bj/
-[Ll]og/
+#[Ll]og/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
