@@ -1,4 +1,4 @@
-module ##ConcernName##
+module <%= api_concern_name %>
     extend ActiveSupport::Concern
 
     included do
