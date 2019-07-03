@@ -1,6 +1,6 @@
 
 # Created by https://www.gitignore.io/api/osx,ruby,linux,rails,windows,sublimetext,visualstudio,visualstudiocode
-
+/storage
 ### Linux ###
 *~
 
