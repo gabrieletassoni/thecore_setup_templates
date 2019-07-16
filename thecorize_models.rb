@@ -70,21 +70,34 @@ say "Completing Belongs To Associations", :green
 # For each model in this gem
 inside('./') do
     @model_files.each do |entry|
+        filename = entry.split("/").last
+        m = entry.split(".").first.split("/").last.camelize
+        # Download this entry's template for api and railsadmin
+        # API
+        get "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thor_templates/model_api_concern.tt", "app/models/concerns/api/#{filename}" unless File.exists?("app/models/concerns/api/#{filename}")
+        get "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thor_templates/model_rails_admin_concern.tt", "app/models/concerns/rails_admin/#{filename}" unless File.exists?("app/models/concerns/rails_admin/#{filename}")
+        # Replace in the generated file the templates
+        gsub_file "app/models/concerns/api/#{filename}", "<%= @model_name %>", m
+        gsub_file "app/models/concerns/rails_admin/#{filename}", "<%= @model_name %>", m
+
         # It must be a class and don't have rails_admin declaration
         say "Working on: #{entry}"
         gsub_file entry, "ActiveRecord::Base", "ApplicationRecord"
-        # Rails admin
-        inject_into_file entry, before: /^end/ do
-            pivot = "\n"
-            pivot += "RailsAdmin.config do |config|\n"
-            pivot += "   config.model self.name.underscore.capitalize.classify do\n"
-            pivot += "       navigation_label I18n.t('admin.settings.label')\n"
-            pivot += "       navigation_icon 'fa fa-file'\n"
-            pivot += "    end\n"
-            pivot += "end\n"
-            pivot += "\n"
-            pivot
-        end unless has_rails_admin_declaration? entry
+        # Associations
+        inject_into_file entry, after: " < ApplicationRecord\n" do
+            "\t# Associations\n"
+        end
+
+        # Validations
+        inject_into_file entry, after: " < ApplicationRecord\n" do
+            "\t# Validations\n"
+        end
+
+        # Concerns
+        inject_into_file entry, after: " < ApplicationRecord\n" do
+            "\t# Concerns\n\tinclude Api::#{m}\n\tinclude RailsAdmin::#{m}\n"
+        end
+
         # Belongs to
         gsub_file entry, /^(?!.*inverse_of.*)^[ \t]*belongs_to.*$/ do |match|
             match << ", inverse_of: :#{entry.split(".").first.split("/").last.pluralize}"
@@ -108,9 +121,9 @@ def add_has_many_to_model_or_concern name, associated_model, this_model, through
     if File.exists?(associated_file)
         # say "The file in which to add has_many, exists and the has_many does not! #{associated_file}", :green
         # if true, check that the association is non existent and add the association to that file
-        inject_into_file associated_file, after: " < ApplicationRecord\n" do
-            pivot = "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
-            pivot = "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+        inject_into_file associated_file, after: "# Associations\n" do
+            pivot = "\thas_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
+            pivot = "\thas_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
             pivot
         end unless has_has_many_association?(associated_file, associated_model.pluralize)
     else
@@ -137,18 +150,18 @@ def add_has_many_to_model_or_concern name, associated_model, this_model, through
         after_initialize_file_name = "after_initialize_for_#{name}.rb"
         after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
         initializer after_initialize_file_name do
-            "Rails.application.configure do\n   config.after_initialize do\n    end\nend"
+            "Rails.application.configure do\n\tconfig.after_initialize do\n\tend\nend"
         end unless File.exists?(after_initialize_file_fullpath)
 
         inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
-            "\n    #{this_model.singularize.classify}.send(:include, #{this_model.singularize.classify}AssociationsConcern)\n"
+            "\t#{this_model.singularize.classify}.send(:include, #{this_model.singularize.classify}AssociationsConcern)\n"
         end
 
         # then add to it the has_many declaration
         # TODO: only if it doesn't already exists
         inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
-            pivot = "\n    has_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
-            pivot = "\n    has_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
+            pivot = "\thas_many :#{associated_model.pluralize}, inverse_of: :#{this_model.singularize}, dependent: :destroy\n" if through_model.blank?
+            pivot = "\thas_many :#{associated_model.pluralize}, through: :#{through_model.pluralize}, inverse_of: :#{this_model.pluralize}\n" unless through_model.blank?
             pivot
         end if File.exists?(File.join("config/initializers", initializer_name))
     end
@@ -214,8 +227,8 @@ inside('./') do
             answers = ask_question_multiple_choice @model_files.reject {|m| m == model || has_polymorphic_has_many?(File.join(@plugin_models_dir,m), polymorphic_target_association)}, "Where do you want to add the polymorphic has_many called #{polymorphic_target_association} found in #{model}?"
             answers.each do |answer|
                 # Add the polymorphic has_name declaration
-                inject_into_file File.join("app/models", answer), after: " < ApplicationRecord\n" do
-                    "\n    has_many :#{model.split(".").first.split("/").last.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.split("/").last.singularize}, dependent: :destroy"
+                inject_into_file File.join("app/models", answer), after: "# Associations\n" do
+                    "\thas_many :#{model.split(".").first.split("/").last.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.split("/").last.singularize}, dependent: :destroy"
                 end if File.exists?(File.join("app/models", answer))
             end
         end

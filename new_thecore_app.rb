@@ -27,7 +27,7 @@ add_gem 'thecore_api' if yes?('Do you want REST API capability for your thecore 
 output = run 'gem search ^thecore_.*$ -ra', capture: true
 themes = {}
 output.split("\n").each do |line|
-  match = line.match /^(thecore_theme_.*) \((.*)\)$/
+  match = line.match(/^(thecore_theme_.*) \((.*)\)$/)
   next if match.blank?
   version = "~> #{match[2].split(',').first.delete('(').split('.').first(2).join('.') rescue '1.0'}"
   themes[match[1]] = version
