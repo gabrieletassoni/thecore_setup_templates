@@ -61,6 +61,7 @@ gsub_file 'app/controllers/application_controller.rb', 'protect_from_forgery wit
 
 apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_git_management.rb"
 
+say("Creating components for the project")
 loop do
   break unless yes?("Would you like to add a thecore component to this project?", :green)
   run('source <(curl -s https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/bin/create_thecore_component)')
