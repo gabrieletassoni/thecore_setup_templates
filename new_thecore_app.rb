@@ -1,6 +1,6 @@
 require 'open-uri'
 
-def add_gem gem_name
+def add_gem gem_name, group
   output = run "gem search ^#{gem_name}$ -ra", capture: true
   versions = (output.match(/^[\s\t]*#{gem_name} \((.*)\)/)[1].split(', ') rescue [] )
 
@@ -16,7 +16,7 @@ loop do
 end
 
 # Adding base gems
-add_gem 'rails-erd', group: :development
+gem 'rails-erd', group: :development
 
 add_gem "thecore"
 add_gem 'thecore_settings'
