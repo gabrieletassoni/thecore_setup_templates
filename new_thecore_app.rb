@@ -64,5 +64,5 @@ apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates
 say("Creating components for the project")
 loop do
   break unless yes?("Would you like to add a thecore component to this project?", :green)
-  run('source <(curl -s https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/bin/create_thecore_component)')
+  run('curl -s https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/bin/create_thecore_component | bash')
 end
