@@ -1,6 +1,6 @@
 require 'open-uri'
 
-def add_gem gem_name, group
+def add_gem gem_name
   output = run "gem search ^#{gem_name}$ -ra", capture: true
   versions = (output.match(/^[\s\t]*#{gem_name} \((.*)\)/)[1].split(', ') rescue [] )
 
