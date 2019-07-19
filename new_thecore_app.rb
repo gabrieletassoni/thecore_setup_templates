@@ -21,7 +21,7 @@ gem 'rails-erd', group: :development
 add_gem "thecore"
 add_gem 'thecore_settings'
 # Do you want REST API?
-add_gem 'thecore_api' if yes?('Do you want REST API capability for your thecore application?', :green, :bold)
+add_gem 'thecore_api' if yes?('Do you want REST API capability for your thecore application?', :green)
 
 # Asking which thecore theme to install
 output = run 'gem search ^thecore_.*$ -ra', capture: true
