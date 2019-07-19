@@ -1,4 +1,4 @@
-module RailsAdmin::<%= @model_name %>RailsAdminConcern
+module RailsAdmin::<%= @model_name %>
     extend ActiveSupport::Concern
     included do
         # Here You can define the RailsAdmin DSL
