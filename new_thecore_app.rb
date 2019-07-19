@@ -61,14 +61,14 @@ gsub_file 'app/controllers/application_controller.rb', 'protect_from_forgery wit
 
 apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_git_management.rb"
 
-inside('../') do
-# TODO: Remove if I can't find a way to interact with the run
-say("Creating components for the project")
-  loop do
-    break unless yes?("Would you like to add a thecore component to this project?", :green)
-    component_name = ask("Please enter component's name:\n")
-    break unless component_name.match?(/^[a-zA-Z_-]+$/)
-    rails "plugin new '#{component_name}' -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_component.rb' --full"
-    # run('curl -s https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/bin/create_thecore_component | bash')
-  end
-end
+# inside('../') do
+# # TODO: Remove if I can't find a way to interact with the run
+# say("Creating components for the project")
+#   loop do
+#     break unless yes?("Would you like to add a thecore component to this project?", :green)
+#     component_name = ask("Please enter component's name:\n")
+#     break unless component_name.match?(/^[a-zA-Z_-]+$/)
+#     rails "plugin new '#{component_name}' -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_component.rb' --full"
+#     # run('curl -s https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/bin/create_thecore_component | bash')
+#   end
+# end
