@@ -59,6 +59,12 @@ end
 # TODO: remove from application controller the protect_from_forgery with: :exception part
 gsub_file 'app/controllers/application_controller.rb', 'protect_from_forgery with: :exception', ''
 
+# Add Uglifier armony for ES6 compatibility
+gsub_file 'config/environments/production.rb', "config.assets.js_compressor", "# config.assets.js_compressor"
+inject_into_file 'config/environments/production.rb', after: "# Compress JavaScripts and CSS.\n" do
+  "  config.assets.js_compressor = Uglifier.new(:harmony => true)\n"
+end
+
 apply "https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_git_management.rb"
 
 # inside('../') do
