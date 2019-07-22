@@ -105,13 +105,13 @@ cat <<EOM | sudo tee /etc/apache2/sites-available/$APPNAME.conf
     ServerName $APPHOST
     Alias /$APPPATH $CURDIR/public
     <Location /$APPPATH>
+	        RedirectMatch ^/ckeditor_assets/(.*)$ /dev/scrumthemall/ckeditor_assets/$1
+        	RedirectMatch ^/assets/ckeditor/(.*)$ /dev/scrumthemall/assets/ckeditor/$1
+        	RedirectMatch ^/ckeditor/(.*)$ /dev/scrumthemall/ckeditor/$1
             PassengerBaseURI /$APPPATH
             PassengerAppRoot $CURDIR
             PassengerRuby $PASSENGERRUBY
             PassengerFriendlyErrorPages on
-	        RedirectMatch ^/ckeditor_assets/(.*)$ /dev/scrumthemall/ckeditor_assets/$1
-        	RedirectMatch ^/assets/ckeditor/(.*)$ /dev/scrumthemall/assets/ckeditor/$1
-        	RedirectMatch ^/ckeditor/(.*)$ /dev/scrumthemall/ckeditor/$1
     </Location>
     <Directory $CURDIR/public>
             # Always set these headers.
