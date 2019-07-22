@@ -77,8 +77,24 @@ RAILS_ENV=production bundle exec rails assets:precompile RAILS_RELATIVE_URL_ROOT
 # APACHE CONFIG
 while [[ $RAILSURL == '' ]]
 do
-    read -p "Please provide the base url of which this app will be a subdomain (i.e. www.taris.it):" RAILSURL
+    read -p "Please provide the url to access this webapp (i.e. https://www.taris.it/dev/myapp):" APPURL
 done 
+
+# Scan the url
+# extract the protocol
+APPPROTO="$(echo $APPURL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+# remove the protocol
+APPFQDN="$(echo ${APPURL/$APPPROTO/})"
+# extract the user (if any)
+APPUSER="$(echo $APPFQDN | grep @ | cut -d@ -f1)"
+# extract the host and port
+APPHOSTPORT="$(echo ${APPFQDN/$APPUSER@/} | cut -d/ -f1)"
+# by request host without port    
+APPHOST="$(echo $APPHOSTPORT | sed -e 's,:.*,,g')"
+# by request - try to extract the port
+APPPORT="$(echo $APPHOSTPORT | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
+# extract the path (if any)
+APPPATH="$(echo $APPFQDN | grep / | cut -d/ -f2-)"
 
 CURDIR=$(pwd)
 CURRUBYVER=$(cat $CURDIR/.ruby-version)
@@ -86,18 +102,31 @@ CURGEMSET=$(cat $CURDIR/.ruby-gemset)
 PASSENGERRUBY="$HOME/.rvm/gems/$CURRUBYVER@$CURGEMSET/wrappers/ruby"
 cat <<EOM | sudo tee /etc/apache2/sites-available/$APPNAME.conf
 <VirtualHost *:443>
-    ServerName $RAILSURL
-    Alias /$APPNAME $CURDIR/public
-    <Location /$APPNAME>
-            PassengerBaseURI /$APPNAME
+    ServerName $APPHOST
+    Alias /$APPPATH $CURDIR/public
+    <Location /$APPPATH>
+            PassengerBaseURI /$APPPATH
             PassengerAppRoot $CURDIR
             PassengerRuby $PASSENGERRUBY
             PassengerFriendlyErrorPages on
+	        RedirectMatch ^/ckeditor_assets/(.*)$ /dev/scrumthemall/ckeditor_assets/$1
+        	RedirectMatch ^/assets/ckeditor/(.*)$ /dev/scrumthemall/assets/ckeditor/$1
+        	RedirectMatch ^/ckeditor/(.*)$ /dev/scrumthemall/ckeditor/$1
     </Location>
     <Directory $CURDIR/public>
+            # Always set these headers.
+            Header always set Access-Control-Allow-Origin "*"
+            Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, DELETE, PUT"
+            Header always set Access-Control-Max-Age "1000"
+            Header always set Access-Control-Allow-Headers "x-requested-with, Content-Type, origin, authorization, accept, client-security-token"
+            # Added a rewrite to respond with a 200 SUCCESS on every OPTIONS request.
+            RewriteEngine On
+            RewriteCond %{REQUEST_METHOD} OPTIONS
+            RewriteRule ^(.*)$ $1 [R=200,L]
+            # Rails definitions
             RailsEnv production
-            SetEnv RAILS_RELATIVE_URL_ROOT /$APPNAME
-            SetEnv RAILS_URL https://$RAILSURL
+            SetEnv RAILS_RELATIVE_URL_ROOT /$APPPATH
+            SetEnv RAILS_URL $APPPROTO$APPHOST
             Allow from all
             Options -MultiViews
             Require all granted
