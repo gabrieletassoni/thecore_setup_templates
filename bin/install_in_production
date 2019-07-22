@@ -44,7 +44,7 @@ if [[ $YN == "y"]]
 then
     while [[ $GEMURL == '' ]]
     do
-        read -p "Please provide the gem server domain (i.e. www.taris.it): " GEMURL
+        read -p "Please provide the gem server URL (i.e. https://www.alchemic.it/gems): " GEMURL
     done 
 
     while [[ $USERNAME == '' ]]
@@ -58,7 +58,7 @@ then
     done 
 
     CREDENTIALS="$(urlencode $USERNAME):$(urlencode $PASSWORD)"
-    gem sources -a "https://$CREDENTIALS@$GEMURL/gems/"
+    gem sources -a "${GEMURL/:\/\//:\/\/$CREDENTIALS@}"
     bundle config $GEMURL $CREDENTIALS
 fi
 
