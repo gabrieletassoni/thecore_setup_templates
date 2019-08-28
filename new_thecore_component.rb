@@ -28,7 +28,8 @@ say "Starting to apply deeper customizations in order to thecorize the component
 # Creating a thecore root component
 if yes? "Is this component a root action (A general action which is shown in the root menu of Thecore app and is not directly linked with a model)?", :red
   # make this a rails_admin plugin
-  apply "https://gist.github.com/bbenezech/1621146/raw/5268788e715397bf476c83d76d335f152095e659/rails_admin_action_creator"
+  # apply "https://gist.github.com/bbenezech/1621146/raw/5268788e715397bf476c83d76d335f152095e659/rails_admin_action_creator"
+  apply 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/rails_admin_action_creator'
   # make the rails admin plugin a root action
   apply 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/thecore_make_root_action.rb'
   # Add more components
