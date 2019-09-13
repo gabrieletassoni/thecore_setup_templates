@@ -6,7 +6,7 @@ if !models_versions.empty? && yes?("Found Models in parent directory, would you 
         model_version = File.open v { |file| file.find { |line| line =~ /VERSION = '(.*)'$/ } }[/'(.*)'/,1].split('.').first(2).join('.') rescue "1.0"
 
         inject_into_file "#{name}.gemspec", before: /^end/ do
-            "   spec.add_dependency '#{model_name}', '~> #{model_version}'\n"
+            "  spec.add_dependency '#{model_name}', '~> #{model_version}'\n"
         end
         inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name)}$/ do
             "require '#{model_name}'\n"
