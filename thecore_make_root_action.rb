@@ -38,7 +38,8 @@ inject_into_file "lib/#{name}.rb", after: "RailsAdmin::Config::Actions.register(
     pivot += "		register_instance_option :controller do\n"
     pivot += "		    Proc.new do # This is needed becaus we sant that this code is re-evaluated each time is called\n"
     pivot += "		        # This could be useful to distinguish between ajax calls and restful calls\n"
-    pivot += "		        if request.xhr?\n"
+    pivot += "		        # Avoid running code on pjax request, only the calls when the doument is ready and displayed are useful\n"
+    pivot += "		        if request.xhr? && !request.headers['X-PJAX']\n"
     pivot += "		        end\n"
     pivot += "		    end\n"
     pivot += "		end\n"
@@ -56,5 +57,5 @@ end
 remove_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.haml"
 
 create_file "app/views/rails_admin/main/#{name.gsub("rails_admin_", "")}.html.erb" do
-    "<%= breadcrumb %>\n"
+    "<%= breadcrumb %>\n<script>\n    $(document).on('ready pjax:success', function () {});\n</script>\n"
 end
