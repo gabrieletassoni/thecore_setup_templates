@@ -9,7 +9,7 @@ done
 # GIT CLONE
 while [[ $GITURL == '' ]]
 do
-    read -p "Please provide the git server domain (i.e. www.taris.it): " GITURL
+    read -p "Please provide the git server (i.e. https://www.alchemic.it/git/example-repo.git): " GITURL
 done 
 
 mkdir -p ~/www/rails
@@ -105,9 +105,9 @@ cat <<EOM | sudo tee /etc/apache2/sites-available/$APPNAME.conf
     ServerName $APPHOST
     Alias /$APPPATH $CURDIR/public
     <Location /$APPPATH>
-	        RedirectMatch ^/ckeditor_assets/(.*)$ /dev/scrumthemall/ckeditor_assets/$1
-        	RedirectMatch ^/assets/ckeditor/(.*)$ /dev/scrumthemall/assets/ckeditor/$1
-        	RedirectMatch ^/ckeditor/(.*)$ /dev/scrumthemall/ckeditor/$1
+            RedirectMatch ^/ckeditor_assets/(.*)$ /$APPPATH/ckeditor_assets/$1
+            RedirectMatch ^/assets/ckeditor/(.*)$ /$APPPATH/assets/ckeditor/$1
+            RedirectMatch ^/ckeditor/(.*)$ /$APPPATH/ckeditor/$1
             PassengerBaseURI /$APPPATH
             PassengerAppRoot $CURDIR
             PassengerRuby $PASSENGERRUBY
