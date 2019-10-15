@@ -75,7 +75,7 @@ RAILS_ENV=production bundle exec rails db:migrate
 RAILS_ENV=production bundle exec rails assets:precompile RAILS_RELATIVE_URL_ROOT="/$APPNAME"
 
 # APACHE CONFIG
-while [[ $RAILSURL == '' ]]
+while [[ $APPURL == '' ]]
 do
     read -p "Please provide the url to access this webapp (i.e. https://www.taris.it/dev/myapp):" APPURL
 done 
