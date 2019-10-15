@@ -135,6 +135,7 @@ cat <<EOM | sudo tee /etc/apache2/sites-available/$APPNAME.conf
 EOM
 
 sudo a2ensite $APPNAME
+sudo a2enmod ssl
 sudo a2enmod headers
 sudo a2enmod rewrite
 sudo service apache2 restart
