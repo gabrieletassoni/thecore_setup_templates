@@ -40,19 +40,19 @@ do
     read -p "Would you like to setup a private gem repository? (y|n) " YN
 done
 
-if [[ $YN == "y"]]
+if [[ "$YN" == "y"]]
 then
-    while [[ $GEMURL == '' ]]
+    while [[ "$GEMURL" == '' ]]
     do
         read -p "Please provide the gem server URL (i.e. https://www.alchemic.it/gems): " GEMURL
     done 
 
-    while [[ $USERNAME == '' ]]
+    while [[ "$USERNAME" == '' ]]
     do
         read -p "Please provide username for $GEMURL gems repository: " USERNAME
     done 
 
-    while [[ $PASSWORD == '' ]]
+    while [[ "$PASSWORD" == '' ]]
     do
         read -p "Please provide the password for $USERNAME: " PASSWORD
     done 
