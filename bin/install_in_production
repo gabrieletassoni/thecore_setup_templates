@@ -136,4 +136,5 @@ EOM
 
 sudo a2ensite $APPNAME
 sudo a2enmod headers
+sudo a2enmod rewrite
 sudo service apache2 restart
