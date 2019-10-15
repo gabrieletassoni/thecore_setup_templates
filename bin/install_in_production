@@ -40,7 +40,7 @@ do
     read -p "Would you like to setup a private gem repository? (y|n) " YN
 done
 
-if [[ "$YN" == "y"]]
+if [[ "$YN" == "y" ]]
 then
     while [[ "$GEMURL" == '' ]]
     do
