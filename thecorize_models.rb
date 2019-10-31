@@ -254,7 +254,7 @@ inside(Dir.pwd) do
                 # Which this engine depends on, let's create the concern
                 # otherwise (the file does not exist) check if the initializer for concerns exists,
                 # For each model in this gem
-                initializer_name = "associations_#{name}_#{associated_file.singularize}_concern.rb"
+                initializer_name = "associations_#{model.split(".").first.split("/").last}_#{associated_file.singularize}_concern.rb"
                 initializer initializer_name do
                     pivot = "require 'active_support/concern'\n"
                     pivot += "\n"
@@ -272,7 +272,7 @@ inside(Dir.pwd) do
 
                 # AGGIUNGO L'INCLUDE
                 say "Adding after_initialize file"
-                after_initialize_file_name = "after_initialize_for_#{name}.rb"
+                after_initialize_file_name = "after_initialize_for_#{model.split(".").first.split("/").last}.rb"
                 after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
                 initializer after_initialize_file_name do
                     "Rails.application.configure do\n\tconfig.after_initialize do\n\tend\nend"
