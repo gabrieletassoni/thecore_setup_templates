@@ -52,6 +52,7 @@ loop do
     generate(:model, model_declaration)
 end
 
+puts Dir.pwd
 # Dir.chdir 'app/models' do
 # Getting all the models that are activerecords:
 inside('app/models') do
