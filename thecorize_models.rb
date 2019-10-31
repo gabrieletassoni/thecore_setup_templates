@@ -67,7 +67,7 @@ say "Found these models: #{@model_files.join("; ")}"
 say "Replace ActiveRecord::Base with ApplicationRecord", :green
 say "Add rails_admin declaration only in files which are ActiveRecords and don't already have that declaration", :green
 
-say "Completing Belongs To Associations", :green
+say "Thecorize the Model and completing Belongs To Associations", :green
 # For each model in this gem
 inside(Dir.pwd) do
     @model_files.each do |entry|
@@ -194,8 +194,10 @@ say "Add Has Many Associations", :green
 inside(Dir.pwd) do
     @model_files.each do |entry|
         file = File.join(entry)
+        say "Entering #{file}"
         # It must be an activerecord model class
         if is_applicationrecord?(file)
+            say "- It's an applicationrecord"
             # say "Looking for belongs_to in #{entry} and adding the relevant has_manies", :green
 
             # Polymorphic must be managed manually
@@ -231,6 +233,61 @@ inside(Dir.pwd) do
                 inject_into_file File.join("app/models", answer), after: "# Associations\n" do
                     "\thas_many :#{model.split(".").first.split("/").last.pluralize}, as: :#{polymorphic_target_association}, inverse_of: :#{answer.split(".").first.split("/").last.singularize}, dependent: :destroy"
                 end if File.exists?(File.join("app/models", answer))
+            end
+        end
+    end
+end
+
+say "Detect orphaned Has Many", :green
+inside(Dir.pwd) do
+    @model_files.each do |model|
+        file = File.join(model)
+        # It must be an activerecord model class
+        # belongs_to :rowable, polymorphic: true, inverse_of: :rows
+        manies = File.readlines(file).grep(/^[ \t]*has_many.*/)
+        manies.each do |has_many|
+            target_association = has_many[/:(.*?),/,1]
+            associated_file = File.join("app", "models", "#{target_association.singularize}.rb")
+            say "Looking if association model exists: #{associated_file}"
+            if !File.exists?(associated_file)
+                # This is the case where the model file doesn't exist in the current engine, maybe it's in another one
+                # Which this engine depends on, let's create the concern
+                # otherwise (the file does not exist) check if the initializer for concerns exists,
+                # For each model in this gem
+                initializer_name = "associations_#{name}_#{associated_file.singularize}_concern.rb"
+                initializer initializer_name do
+                    pivot = "require 'active_support/concern'\n"
+                    pivot += "\n"
+                    pivot += "module #{associated_file.singularize.classify}AssociationsConcern\n"
+                    pivot += "    extend ActiveSupport::Concern\n"
+                    pivot += "    included do\n"
+                    pivot += "    end\n"
+                    pivot += "end\n"
+                    pivot += "\n"
+                    pivot += "# include the extension\n"
+                    pivot += "# #{associated_file.singularize.classify}.send(:include, #{associated_file.singularize.classify}AssociationsConcern)\n"
+                    pivot += "\n"
+                    pivot
+                end unless File.exists?(File.join("config/initializers", initializer_name))
+
+                # AGGIUNGO L'INCLUDE
+                say "Adding after_initialize file"
+                after_initialize_file_name = "after_initialize_for_#{name}.rb"
+                after_initialize_file_fullpath = File.join("config/initializers", after_initialize_file_name)
+                initializer after_initialize_file_name do
+                    "Rails.application.configure do\n\tconfig.after_initialize do\n\tend\nend"
+                end unless File.exists?(after_initialize_file_fullpath)
+
+                inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
+                    "\t#{associated_file.singularize.classify}.send(:include, #{associated_file.singularize.classify}AssociationsConcern)\n"
+                end
+
+                # then add to it the has_many declaration
+                # TODO: only if it doesn't already exists
+                inject_into_file File.join("config/initializers", initializer_name), after: "included do\n" do
+                    pivot = "\tbelongs_to :#{model.split(".").first.split("/").last.singularize}, inverse_of: :#{target_association.pluralize}\n"
+                    pivot
+                end if File.exists?(File.join("config/initializers", initializer_name))
             end
         end
     end
