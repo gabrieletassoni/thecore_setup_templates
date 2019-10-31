@@ -55,7 +55,7 @@ end
 puts Dir.pwd
 # Dir.chdir 'app/models' do
 # Getting all the models that are activerecords:
-inside('app/models') do
+inside("#{Dir.pwd}/app/models") do
     @model_files = Dir.glob('*.rb').map do |model|
         "app/models/#{model}" if is_applicationrecord?(model) || is_activerecord?(model)
     end.compact 
@@ -69,7 +69,7 @@ say "Add rails_admin declaration only in files which are ActiveRecords and don't
 
 say "Completing Belongs To Associations", :green
 # For each model in this gem
-inside('./') do
+inside(Dir.pwd) do
     @model_files.each do |entry|
         filename = entry.split("/").last
         m = entry.split(".").first.split("/").last.camelize
@@ -170,7 +170,7 @@ end
 
 say "Add Has Many Through Associations", :green
 # I'ts just an approximation, but for now it could work
-inside('./') do
+inside(Dir.pwd) do
     @model_files.each do |model|
         association_model = model.split(".").first.split("/").last
         file = File.join(model)
@@ -191,7 +191,7 @@ end
 
 say "Add Has Many Associations", :green
 # For each model in this gem
-inside('./') do
+inside(Dir.pwd) do
     @model_files.each do |entry|
         file = File.join(entry)
         # It must be an activerecord model class
@@ -216,7 +216,7 @@ end
 say "Detect polymorphic Associations", :green
 # For each model in this gem
 # say "MODEL FILES: #{@model_files.inspect} "
-inside('./') do
+inside(Dir.pwd) do
     @model_files.each do |model|
         file = File.join(model)
         # It must be an activerecord model class
