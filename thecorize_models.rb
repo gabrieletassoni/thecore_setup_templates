@@ -254,18 +254,18 @@ inside(Dir.pwd) do
                 # Which this engine depends on, let's create the concern
                 # otherwise (the file does not exist) check if the initializer for concerns exists,
                 # For each model in this gem
-                initializer_name = "associations_#{model.split(".").first.split("/").last}_#{associated_file.singularize}_concern.rb"
+                initializer_name = "associations_#{model.split(".").first.split("/").last}_#{target_association.singularize}_concern.rb"
                 initializer initializer_name do
                     pivot = "require 'active_support/concern'\n"
                     pivot += "\n"
-                    pivot += "module #{associated_file.singularize.classify}AssociationsConcern\n"
+                    pivot += "module #{target_association.singularize.classify}AssociationsConcern\n"
                     pivot += "    extend ActiveSupport::Concern\n"
                     pivot += "    included do\n"
                     pivot += "    end\n"
                     pivot += "end\n"
                     pivot += "\n"
                     pivot += "# include the extension\n"
-                    pivot += "# #{associated_file.singularize.classify}.send(:include, #{associated_file.singularize.classify}AssociationsConcern)\n"
+                    pivot += "# #{target_association.singularize.classify}.send(:include, #{target_association.singularize.classify}AssociationsConcern)\n"
                     pivot += "\n"
                     pivot
                 end unless File.exists?(File.join("config/initializers", initializer_name))
@@ -279,7 +279,7 @@ inside(Dir.pwd) do
                 end unless File.exists?(after_initialize_file_fullpath)
 
                 inject_into_file after_initialize_file_fullpath, after: "config.after_initialize do\n" do
-                    "\t#{associated_file.singularize.classify}.send(:include, #{associated_file.singularize.classify}AssociationsConcern)\n"
+                    "\t#{target_association.singularize.classify}.send(:include, #{target_association.singularize.classify}AssociationsConcern)\n"
                 end
 
                 # then add to it the has_many declaration
