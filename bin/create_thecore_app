@@ -6,10 +6,14 @@
 echo "Ubuntu Packages"
 sudo apt update
 sudo apt -y install gridsite-clients gnupg2 git-core build-essential postgresql postgresql-contrib libpq-dev libcurl4-gnutls-dev
+echo "RVM"
+sudo ln -sfn /bin/mkdir /usr/bin/mkdir
 gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-\curl -sSL https://get.rvm.io | bash -s stable --rails
+\curl -sSL https://get.rvm.io | bash -s stable
 echo rvm_autoupdate_flag=2 > ~/.rvmrc
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+gem install bundler -N
+gem install rails -N
 echo "Checking OS dependencies"
 echo "Node, NVM, AVN and YARN"
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
