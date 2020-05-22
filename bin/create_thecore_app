@@ -7,7 +7,7 @@ if [[ "$COMPNAME"  =~ ^[a-z_-]+$ ]]; then
     if [ -e "$FULLNAME" ]; then
         echo "ERROR! The file already exists, please use another name." 
     else
-        rails new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_app.rb' --webpack
+        rails new "$FULLNAME" -m 'https://raw.githubusercontent.com/gabrieletassoni/thecore_setup_templates/master/new_thecore_app.rb' --webpack --database=postgresql
         
         # CLEANUPS
         sudo -u postgres dropdb --if-exists "${FULLNAME}_development"
