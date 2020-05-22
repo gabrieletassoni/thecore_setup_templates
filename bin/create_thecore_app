@@ -66,7 +66,7 @@ then
         echo "- sqlite3::memory:"
         echo -e "\e[31mThe database must be already up and running and reachable by this installation.\e[0m"
         STOPLOOP=false
-        while($STOPLOOP)
+        while $STOPLOOP
         do
             read
             echo "Is the connection string $REPLY correct?"
@@ -118,7 +118,7 @@ production:
     echo "${FULLNAME}" > "${FULLNAME}/.ruby-gemset"
     cd "$FULLNAME"
 
-    # Add Thecore specific gems
+    # Add Thecore base gems
     if [[ $APPLICATION_TYPE -eq "api" ]]
     then
         echo "gem 'model_driven_api', '~> 2.0', require: 'model_driven_api'" >> Gemfile
@@ -129,6 +129,67 @@ production:
         echo "gem 'thecore_ui_rails_admin', '~> 2.0', require: 'thecore_ui_rails_admin'" >> Gemfile
     fi
 
+    # Private GEM Repo
+    echo "Would you like to setup a private gem repository or provide an existing one?"
+    OPTIONS=("setup" "provide" "none of the above, go on without adding a private repository")
+    choose
+    if [[ $CHOICE -eq "setup" ]]
+    then
+        STOPLOOP=false
+        while $STOPLOOP
+        do
+            while [[ "$GEMURL" == '' ]]
+            do
+                read -p "Please provide the gem server URL (i.e. https://www.alchemic.it/gems): " GEMURL
+            done 
+
+            while [[ "$USERNAME" == '' ]]
+            do
+                read -p "Please provide username for $GEMURL gems repository: " USERNAME
+            done 
+
+            while [[ "$PASSWORD" == '' ]]
+            do
+                read -p "Please provide the password for $USERNAME: " PASSWORD
+            done 
+
+            CREDENTIALS="$(urlencode $USERNAME):$(urlencode $PASSWORD)"
+            gem sources -a "${GEMURL/:\/\//:\/\/$CREDENTIALS@}"
+            bundle config $GEMURL $CREDENTIALS
+
+            echo "Would you like to setup more private gems repositories?"
+            OPTIONS=("yes" "no")
+            choose
+            if [[ $CHOICE -eq "no" ]]
+            then
+                STOPLOOP=true
+            fi
+        done
+    elif [[ $CHOICE -eq "provide" ]]
+        # Just add in the Gemfile
+        STOPLOOP=false
+        while $STOPLOOP
+        do
+            echo "Write here the URL of the private GEMs repository"
+            read
+            echo "Is GEMs URL $REPLY correct?"
+            OPTIONS=("yes" "no")
+            choose
+            if [[ $CHOICE -eq "yes" ]]
+            then
+                echo "source '$REPLY'" >> Gemfile
+            fi
+            echo "Would you like to add more private gems repositories?"
+            OPTIONS=("yes" "no")
+            choose
+            if [[ $CHOICE -eq "no" ]]
+            then
+                STOPLOOP=true
+            fi
+        done
+        
+    fi
+
     # Asking for more gems
     echo "Do you want to add more gems to the App?"
     OPTIONS=("yes" "no")
@@ -136,7 +197,7 @@ production:
     if [[ $CHOICE -eq "yes" ]]
     then
         STOPLOOP=false
-        while($STOPLOOP)
+        while $STOPLOOP
         do
             echo "Please add the name and the semver of the gem."
             echo "For example: thecore_background_jobs 2.0"
@@ -434,7 +495,7 @@ tmp
     if [[ $CHOICE -eq "yes" ]]
     then
         STOPLOOP=false
-        while($STOPLOOP)
+        while $STOPLOOP
         do
             read
             echo "Is the connection string $REPLY correct?"
