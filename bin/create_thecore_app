@@ -1,35 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
 
-# IMPORTANT: Source RVM as a function into local environment.
-#            Otherwise switching gemsets won't work.
-# Also if RVM is not present, it fails.
-echo "Ubuntu Packages"
-sudo apt update
-sudo apt -y install gridsite-clients gnupg2 git-core build-essential postgresql postgresql-contrib libpq-dev libcurl4-gnutls-dev
-echo "RVM"
-sudo ln -sfn /bin/mkdir /usr/bin/mkdir
-gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-\curl -sSL https://get.rvm.io | bash -s stable
-echo rvm_autoupdate_flag=2 > ~/.rvmrc
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-gem install bundler -N
-gem install rails -N
-echo "Checking OS dependencies"
-echo "Node, NVM, AVN and YARN"
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-nvm ls-remote --lts|grep Latest # To list all available LTS node releases
-nvm install --lts
-npm install --global yarn # to handle JS dependencies in rails projects, may be used with --global
-npm install -g avn avn-nvm avn-n # To automatically manage .node-version files in main rails container for Thecore Apps
-avn setup
-
-echo "PostgreSQL"
-sudo sed -r -i 's/^(local\s+all\s+all\s+)peer$/\1md5/gm' /etc/postgresql/*/main/pg_hba.conf
-sudo service postgresql restart
-
+# Functions
 choose () {
     echo -e "\e[33mPlease type the number of the choice.\e[0m"
     select CHOICE in "${OPTIONS[@]}"; do
@@ -38,6 +9,52 @@ choose () {
         break # a valid choice was made, exit the prompt.
     done
 }
+
+yesno () {
+    echo "$1"
+    OPTIONS=("yes" "no")
+    choose
+}
+
+# IMPORTANT: Source RVM as a function into local environment.
+#            Otherwise switching gemsets won't work.
+# Also if RVM is not present, it fails.
+echo "Checking OS dependencies"
+echo "Ubuntu Packages"
+sudo apt update
+sudo apt -y install gridsite-clients gnupg2 git-core build-essential postgresql postgresql-contrib libpq-dev libcurl4-gnutls-dev
+echo "RVM"
+if ! [[ -s "$HOME/.rvm/scripts/rvm" ]] || ! source "$HOME/.rvm/scripts/rvm" || ! command -v rvm
+then
+    sudo ln -sfn /bin/mkdir /usr/bin/mkdir
+    gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+    \curl -sSL https://get.rvm.io | bash -s stable
+    echo rvm_autoupdate_flag=2 > ~/.rvmrc
+    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+    gem install bundler -N
+    gem install rails -N
+fi
+echo "Node, NVM, AVN and YARN"
+if ! command -v npm
+then
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    nvm ls-remote --lts|grep Latest # To list all available LTS node releases
+    nvm install --lts
+    npm install -g avn avn-nvm avn-n # To automatically manage .node-version files in main rails container for Thecore Apps
+    avn setup
+fi
+if ! command -v yarn
+then
+    npm install --global yarn # to handle JS dependencies in rails projects, may be used with --global
+fi
+
+echo "PostgreSQL"
+# have actual users and not system users.
+sudo sed -r -i 's/^(local\s+all\s+all\s+)peer$/\1md5/gm' /etc/postgresql/*/main/pg_hba.conf
+sudo service postgresql restart
 
 echo "Please enter app's name:" 
 read -r FULLNAME
@@ -83,9 +100,7 @@ then
     # Actually run the selected Thecore application type
     rails new "$FULLNAME" "${args[@]}"
 
-    echo "Is the Database already existing?"
-    OPTIONS=("yes" "no")
-    choose
+    yesno "Is the Database already existing?"
     if [[ $CHOICE == "yes" ]]
     then
         echo "Please provide the connection string for the existing Database."
@@ -98,9 +113,7 @@ then
         while $STOPLOOP
         do
             read -r
-            echo "Is the connection string $REPLY correct?"
-            OPTIONS=("yes" "no")
-            choose
+            yesno "Is the connection string $REPLY correct?"
             if [[ $CHOICE == "yes" ]]
             then
                 DB_CONNECTION_STRING_TEST="${REPLY}"
@@ -188,9 +201,7 @@ EOF
             gem sources -a "${GEMURL/:\/\//:\/\/$CREDENTIALS@}"
             bundle config "$GEMURL" "$CREDENTIALS"
 
-            echo "Would you like to setup more private gems repositories?"
-            OPTIONS=("yes" "no")
-            choose
+            yesno "Would you like to setup more private gems repositories?"
             if [[ $CHOICE == "no" ]]
             then
                 STOPLOOP=true
@@ -204,16 +215,12 @@ EOF
         do
             echo "Write here the URL of the private GEMs repository"
             read -r
-            echo "Is GEMs URL $REPLY correct?"
-            OPTIONS=("yes" "no")
-            choose
+            yesno "Is GEMs URL $REPLY correct?"
             if [[ $CHOICE == "yes" ]]
             then
                 echo "source '$REPLY'" >> Gemfile
             fi
-            echo "Would you like to add more private gems repositories?"
-            OPTIONS=("yes" "no")
-            choose
+            yesno "Would you like to add more private gems repositories?"
             if [[ $CHOICE == "no" ]]
             then
                 STOPLOOP=true
@@ -223,9 +230,7 @@ EOF
     fi
 
     # Asking for more gems
-    echo "Do you want to add more gems to the App?"
-    OPTIONS=("yes" "no")
-    choose
+    yesno "Do you want to add more gems to the App?"
     if [[ $CHOICE == "yes" ]]
     then
         STOPLOOP=false
@@ -235,16 +240,12 @@ EOF
             echo "For example: thecore_background_jobs 2.0"
             echo "this will be translated to gem 'thecore_background_jobs', '~> 2.0', require: 'thecore_background_jobs'"
             read -r GEMNAME VERSION
-            echo "Are the gem name and version correct? $GEMNAME $VERSION"
-            OPTIONS=("yes" "no" "exit")
-            choose
+            yesno "Are the gem name and version correct? $GEMNAME $VERSION"
             if [[ $CHOICE == "yes" ]]
             then
                 echo "gem '$GEMNAME', '~> $VERSION', require: '$GEMNAME'" >> Gemfile
             fi
-            echo "Would you like to add more gems?"
-            OPTIONS=("yes" "no")
-            choose
+            yesno "Would you like to add more gems?"
             if [[ $CHOICE == "no" ]]
             then
                 STOPLOOP=true
@@ -520,18 +521,14 @@ EOF
 
     git add . -A
     git commit -a -m"Initial Git"
-    echo "Would you like to add a remote git repository?"
-    OPTIONS=("yes" "no")
-    choose
+    yesno "Would you like to add a remote git repository?"
     if [[ $CHOICE == "no" ]]
     then
         STOPLOOP=false
         while $STOPLOOP
         do
             read -r
-            echo "Is the connection string $REPLY correct?"
-            OPTIONS=("yes" "no")
-            choose
+            yesno "Is the connection string $REPLY correct?"
             if [[ $CHOICE == "yes" ]]
             then
                 git remote origin add "${REPLY}"
