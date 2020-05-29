@@ -14,7 +14,7 @@ done
 
 mkdir -p ~/www/rails
 cd ~/www/rails/
-git clone "$GITURL"
+git clone "$GITURL" "$APPNAME
 cd "$APPNAME"
 
 # POSTGRESQL
