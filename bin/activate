@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+if [ -n "$ZSH_VERSION" ]; then
+    # Assume Zsh shell
+    export PATH="$PATH:$(realpath $(dirname "${(%):-%N}"))"
+else
+    # Assume Bash shell
+    export PATH="$PATH:$(realpath $(dirname "${BASH_SOURCE[0]}"))"
+fi
