@@ -1,3 +1,13 @@
+#### Permanent setup
+
+To permanently add `devops-cli` to path.
+
+Add `activate` execution to `.bashrc`:
+
+```bash
+echo "[ -f \"$(realpath bin/activate)\" ] && . $(realpath bin/activate)" >> ~/.bashrc
+```
+
 # Thecore Scripts
 These are some helper scripts to make developing using [Thecore](https://github.com/gabrieletassoni/thecore) even easier.
  * new\_thecore\_app.rb is used as a template file for [rails new](https://github.com/gabrieletassoni/thecore/wiki/Create-a-Thecore-based-RoR-app)
