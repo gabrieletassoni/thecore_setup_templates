@@ -20,9 +20,9 @@ inject_into_file "#{name}.gemspec", before: /^end/ do
 "  spec.add_dependency 'thecore', '#{version}'\n"
 end
 
-inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name)}$/ do
-"require 'thecore'\n"
-end
+# inject_into_file "lib/#{name}.rb", before: /^module #{Thor::Util.camel_case(name)}$/ do
+# "require 'thecore'\n"
+# end
 
 say "Starting to apply deeper customizations in order to thecorize the component", :green
 # Creating a thecore root component
